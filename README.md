@@ -1,4 +1,4 @@
-# CivilGunMagazineServer
+# Civil Gun Management System Server
 
 民用枪支管理系统服务端
 ###
