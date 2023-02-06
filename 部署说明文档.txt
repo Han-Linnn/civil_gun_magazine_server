@@ -1,6 +1,5 @@
 
 Launch project:
-
 First run: com.company.project.Application.java
 or
 mvn: spring-boot:run
