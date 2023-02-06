@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.apply.dao.FirearmsApplyTypeLogMapper">
+
+    <resultMap id="firearmsApplyTypeLogVo" type="com.jingde.equipment.app.apply.vo.FirearmsApplyTypeLogVo">
+        <result column="id" property="id"/>
+        <result column="apply_id" property="applyId"/>
+        <result column="firearm_type_id" property="firearmTypeId"/>
+        <result column="firearm_type" property="firearmType"/>
+        <result column="ammo_type_id" property="ammoTypeId"/>
+        <result column="ammo_type" property="ammoType"/>
+        <result column="apply_firearm_count" property="applyFirearmCount"/>
+        <result column="received_firearm_count" property="receivedFirearmCount"/>
+        <result column="returned_firearm_count" property="returnedFirearmCount"/>
+        <result column="apply_ammo_count" property="applyAmmoCount"/>
+        <result column="received_ammo_count" property="receivedAmmoCount"/>
+        <result column="returned_ammo_count" property="returnedAmmoCount"/>
+        <result column="type" property="type"/>
+    </resultMap>
+
+    <insert id="insertByList" useGeneratedKeys="true" keyProperty="id">
+        insert into t_firearms_apply_type_log(apply_id, firearm_type_id, firearm_type, ammo_type_id,ammo_type,apply_firearm_count,apply_ammo_count )
+        values
+        <foreach collection="list" open="" item="item" index="index" separator="," close="">
+            (#{item.applyId},#{item.firearmTypeId},#{item.firearmType},#{item.ammoTypeId},#{item.ammoType},#{item.applyFirearmCount},#{item.applyAmmoCount})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByLogId">
+        delete from t_firearms_apply_type_log where apply_id = #{id}
+    </delete>
+
+    <select id="selectByApplyId" resultMap="firearmsApplyTypeLogVo">
+        select fatl.id,fatl.apply_id,fatl.firearm_type_id,fatl.firearm_type,
+          fatl.apply_firearm_count,fatl.received_firearm_count,fatl.returned_firearm_count,
+          fatl.ammo_type,fatl.ammo_type_id,fatl.apply_ammo_count,fatl.received_ammo_count,fatl.returned_ammo_count,ft.type
+        from t_firearms_apply_type_log fatl left join t_firearms_type ft on fatl.firearm_type_id = ft.id where fatl.apply_id = #{applyId}
+    </select>
+
+    <select id="selectByApplyIds"  resultMap="firearmsApplyTypeLogVo">
+        select fatl.id,fatl.apply_id,fatl.firearm_type_id,fatl.firearm_type,
+          fatl.apply_firearm_count,fatl.received_firearm_count,fatl.returned_firearm_count,
+          fatl.ammo_type,fatl.ammo_type_id,fatl.apply_ammo_count,fatl.received_ammo_count,fatl.returned_ammo_count,ft.type
+        from t_firearms_apply_type_log fatl left join t_firearms_type ft on fatl.firearm_type_id = ft.id where fatl.apply_id in
+          <foreach collection="list" open="(" item="item" index="index" separator="," close=")">
+              #{item}
+          </foreach>
+    </select>
+
+    <update id="updateReceivedCountByIds">
+        <foreach collection="list" open="" item="item" index="index" separator=";" close="">
+            update t_firearms_apply_type_log set received_firearm_count = received_firearm_count+#{item.receivedFirearmCount},received_ammo_count = received_ammo_count+#{item.receivedAmmoCount} where id = #{item.id}
+        </foreach>
+    </update>
+    <update id="updateReturnCountByIds">
+        <foreach collection="list" open="" item="item" index="index" separator=";" close="">
+            update t_firearms_apply_type_log set returned_firearm_count = returned_firearm_count+#{item.returnedFirearmCount},returned_ammo_count = returned_ammo_count+#{item.returnedAmmoCount} where id = #{item.id}
+        </foreach>
+    </update>
+</mapper>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--引入默认的设置-->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!--#########属性#########-->
+    <!--使用springProperty才可使用application.properties中的值，可以设置默认值-->
+    <!-- 日志根目录-->
+    <springProperty scope="context" name="LOG_HOME" source="logging.path" defaultValue="./logs"/>
+    <!-- 日志级别从低到高分为TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果设置为WARN，则低于WARN的信息都不会输出 -->
+    <springProperty scope="context" name="LOG_ROOT_LEVEL" source="logging.level.root" defaultValue="DEBUG"/>
+    <!--  标识这个"STDOUT" 将会添加到这个logger -->
+    <springProperty scope="context" name="STDOUT" source="log.stdout" defaultValue="STDOUT"/>
+
+    <!--#########自定义属性#########-->
+    <!-- 日志文件前缀名-->
+    <property name="LOG_PREFIX" value="log"/>
+    <!-- 日志文件路径+日期-->
+    <property name="LOG_DIR" value="${LOG_HOME}/%d{yyyyMMdd}"/>
+    <!--文件大小，默认50MB-->
+    <property name="MAX_FILE_SIZE" value="50MB"/>
+    <!-- 配置日志的滚动时间 ，表示只保留最近 10 天的日志-->
+    <property name="MAX_HISTORY" value="10"/>
+
+    <!--不同的 Appender 能将日志信息打印到不同的目的地去-->
+    <!--Appender 是绑定在 logger 上的，同时，一个 logger 可以绑定多个 Appender-->
+    <!--用 Layout 来代表日志打印格式-->
+    <!--输出日志到控制台的appender-->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 输出的日志内容格式化-->
+        <!--写入日志到控制台的appender,用默认的,但是要去掉charset,否则windows下tomcat下乱码-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </layout>
+    </appender>
+    <!--写入日志到文件的appender-->
+    <appender name="LOGGER_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--append: true,日志被追加到文件结尾;-->
+        <!--append: false,清空现存文件;默认是true-->
+        <append>true</append>
+        <file>${LOG_HOME}/app_${LOG_PREFIX}.log</file>
+        <!--设置滚动策略，当天的日志大小超过 ${MAX_FILE_SIZE} 文件大小时候，新的内容写入新的文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--每日归档日志文件，新的日志文件名称，“ i ” 是个变量 -->
+            <FileNamePattern>${LOG_DIR}/app_${LOG_PREFIX}_%i.log</FileNamePattern>
+            <!--配置日志的滚动时间 ，表示只保留最近配置天数的日志-->
+            <MaxHistory>${MAX_HISTORY}</MaxHistory>
+            <!--当天的日志大小超过 ${MAX_FILE_SIZE} 文件大小时候，新的内容写入新的文件-->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <!--输出的日志内容格式化-->
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!--设置全局logger level-->
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.apache.commons" level="ERROR"/>
+
+    <!-- 多个环境使用逗号隔开 -->
+    <!--本地开发环境:打印控制台-->
+    <springProfile name="dev">
+        <root level="${LOG_ROOT_LEVEL}">
+            <appender-ref ref="${STDOUT}"/>
+        </root>
+        <logger name="org.apache.ibatis" level="INFO"/>
+        <logger name="org.mybatis.spring" level="INFO"/>
+        <logger name="org.hibernate.validator" level="INFO"/>
+        <logger name="io.lettuce.core" level="INFO"/>
+        <logger name="com.jingde.equipment.app.**.dao" level="DEBUG"/>
+    </springProfile>
+    <!--线上测试环境: 输出到文件-->
+    <springProfile name="test">
+        <root level="ERROR">
+            <appender-ref ref="LOGGER_FILE"/>
+            <!--            <appender-ref ref="${STDOUT}"/>-->
+        </root>
+    </springProfile>
+    <!--生产环境: 输出到文件-->
+    <springProfile name="prod">
+        <root level="ERROR">
+            <appender-ref ref="LOGGER_FILE"/>
+        </root>
+        <!-- 记录 sql 到日志文件 -->
+        <!-- additivity -->
+        <!--false：只用当前logger的appender-ref-->
+        <!--true：appender-ref和rootLogger的appender-ref都有效。-->
+        <logger name="com.jingde.equipment.app.**.dao" level="DEBUG" additivity="false">
+            <appender-ref ref="LOGGER_FILE"/>
+        </logger>
+        <!-- 需要记录在日志文件的应用日志 -->
+        <logger name="server-logger" level="INFO">
+            <appender-ref ref="LOGGER_FILE"/>
+        </logger>
+    </springProfile>
+</configuration>

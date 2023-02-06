@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.police.dao.PoliceMapper">
+
+    <resultMap id="infoVo" type="com.jingde.equipment.model.Police">
+        <result column="id" property="id"/>
+        <result column="police_name" property="policeName"/>
+        <result column="police_code" property="policeCode"/>
+        <result column="firearm_code" property="firearmCode"/>
+        <result column="firearm_code_publish" property="firearmCodePublish"/>
+        <result column="political_status" property="politicalStatus"/>
+        <result column="nation" property="nation"/>
+        <result column="photo" property="photo"/>
+        <result column="mobile" property="mobile"/>
+        <result column="mobile_bak" property="mobileBak"/>
+        <result column="address" property="address"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="id_card" property="idCard"/>
+        <result column="depart_id" property="departId"/>
+        <result column="department_name" property="departmentName"/>
+        <result column="post_id" property="postId"/>
+        <result column="post_name" property="postName"/>
+        <result column="use_gun_status" property="useGunStatus"/>
+        <result column="gun_code" property="gunCode"/>
+        <result column="status" property="status"/>
+        <result column="annual_verification" property="annualVerification"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <resultMap id="policeInfoVo" type="com.jingde.equipment.app.system.vo.PoliceInfoVO">
+        <result column="id" property="id"/>
+        <result column="police_name" property="policeName"/>
+        <result column="police_code" property="policeCode"/>
+        <result column="firearm_code" property="firearmCode"/>
+        <result column="firearm_code_publish" property="firearmCodePublish"/>
+        <result column="political_status" property="politicalStatus"/>
+        <result column="nation" property="nation"/>
+        <result column="photo" property="photo"/>
+        <result column="mobile" property="mobile"/>
+        <result column="mobile_bak" property="mobileBak"/>
+        <result column="address" property="address"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="id_card" property="idCard"/>
+        <result column="depart_id" property="departId"/>
+        <result column="department_name" property="departmentName"/>
+        <result column="post_name" property="postName"/>
+        <result column="post_id" property="postId"/>
+        <result column="use_gun_status" property="useGunStatus"/>
+        <result column="gun_code" property="gunCode"/>
+        <result column="groupName" property="groupName"/>
+        <result column="is_sub_account" property="isSubAccount"/>
+        <result column="home_page" property="homePage"/>
+    </resultMap>
+
+    <select id="selectListByPage" resultMap="policeInfoVo">
+        SELECT
+        p.id,
+        p.police_name,
+        p.police_code,
+        p.department_name,
+        t.groupName,
+        p.post_name,
+        p.post_id
+        FROM
+        t_police p
+        LEFT JOIN t_user u ON p.id = u.police_id
+        LEFT JOIN
+        (SELECT GROUP_CONCAT( g.group_name SEPARATOR ',' ) AS groupName,gu.user_id FROM t_group_user gu
+        LEFT JOIN t_group g ON g.id =gu.group_id
+        GROUP BY gu.user_id ) t on u.id = t.user_id
+        WHERE
+        u.is_sub_account = 0
+        <if test="condition.policeName != null and condition.policeName != '' ">
+            and instr(p.police_name,#{condition.policeName}) >0
+        </if>
+        <if test="condition.policeCode != null and condition.policeCode != '' ">
+            and instr(p.police_code,#{condition.policeCode}) >0
+        </if>
+        <if test="condition.departId != null and condition.departId != '' ">
+            and p.depart_id = #{condition.departId}
+        </if>
+        <if test="condition.departmentName != null and condition.departmentName != '' ">
+            and instr(p.department_name,#{condition.departmentName}) >0
+        </if>
+        <if test="condition.postLevel != null and condition.postLevel != '' ">
+            and instr(p.post_name,#{condition.postLevel}) >0
+        </if>
+        ORDER BY id desc
+    </select>
+
+    <select id="findInfoById" resultMap="policeInfoVo">
+        SELECT
+              p.id,
+              p.police_name,
+              p.police_code,
+              p.firearm_code,
+              p.firearm_code_publish,
+              p.political_status,
+              p.nation,
+              p.photo,
+              p.mobile,
+              p.mobile_bak,
+              p.address,
+              p.sex,
+              p.age,
+              p.id_card,
+              p.depart_id,
+              p.department_name,
+              p.gun_code,
+              p.use_gun_status,
+              p.post_id,
+              case  when t.groupName is null then '' else t.groupName end groupName,
+              u.is_sub_account,
+              u.home_page,
+              u.is_son
+        FROM
+            t_police p
+            LEFT JOIN t_user u ON p.id = u.police_id and is_sub_account = 0
+            LEFT JOIN (
+              SELECT GROUP_CONCAT(g.group_name SEPARATOR ',') AS groupName,gu.user_id FROM t_group_user gu LEFT JOIN t_group g ON g.id =gu.group_id GROUP BY gu.user_id
+            ) t on u.id = t.user_id where p.id = #{id}
+    </select>
+
+    <insert id="add">
+      insert into t_police (
+      `police_name` ,
+      `police_code`,
+      `political_status` ,
+      `nation` ,
+      `photo` ,
+      `mobile` ,
+      `mobile_bak` ,
+      `address` ,
+      `sex` ,
+      `age` ,
+      `id_card` ,
+      `depart_id` ,
+      `department_name` ,
+      `annual_verification`,
+      `post_id`,
+      `post_name`)
+      VALUES (
+      #{condition.policeName,jdbcType=VARCHAR},
+      #{condition.policeCode,jdbcType=VARCHAR},
+      #{condition.politicalStatus,jdbcType=VARCHAR},
+      #{condition.nation,jdbcType=VARCHAR},
+      #{condition.photo,jdbcType=VARCHAR},
+      #{condition.mobile,jdbcType=VARCHAR},
+      #{condition.mobileBak,jdbcType=VARCHAR},
+      #{condition.address},
+      #{condition.sex} ,
+      #{condition.age},
+      #{condition.idCard},
+      #{condition.departId},
+      #{condition.departmentName,jdbcType=VARCHAR},
+      #{condition.annualVerification},
+      #{condition.postId},
+      #{condition.postName}
+      )
+  </insert>
+
+    <select id="selectByPoliceCodeOrId" resultMap="infoVo">
+        select
+        `id`,
+        `police_name` ,
+        `police_code`,
+        `firearm_code` ,
+        `firearm_code_publish` ,
+        `political_status` ,
+        `nation` ,
+        `photo` ,
+        `mobile` ,
+        `mobile_bak` ,
+        `address` ,
+        `sex`,
+        `age` ,
+        `id_card` ,
+        `depart_id` ,
+        `department_name` ,
+        `status` ,
+        `annual_verification`
+        from t_police where 1=1
+        <if test="policeCode != null and policeCode != '' ">and police_code = #{policeCode}</if>
+        <if test="id != null and id != '' ">and id= #{id}</if>
+        limit 0,1
+    </select>
+
+    <select id="selectByPoliceCode" resultMap="infoVo">
+        select
+        `id`,
+        `police_name` ,
+        `police_code`,
+        `firearm_code` ,
+        `firearm_code_publish` ,
+        `political_status` ,
+        `nation` ,
+        `photo` ,
+        `mobile` ,
+        `mobile_bak` ,
+        `address` ,
+        `sex`,
+        `age` ,
+        `id_card` ,
+        `depart_id` ,
+        `department_name` ,
+        `status` ,
+        `annual_verification`
+        from t_police where 1=1
+        <if test="policeCode != null and policeCode != '' ">and police_code= #{policeCode}</if>
+        <if test="policeName != null and policeName != '' ">and police_name= #{policeName}</if>
+    </select>
+
+    <select id="selectByDepartmentId" resultMap="infoVo">
+        select
+          `id`,
+          `police_name` ,
+          `police_code`,
+          `political_status` ,
+          `nation` ,
+          `age`,
+          `sex`
+        from t_police where depart_id = #{departId}
+    </select>
+
+    <select id="selectByNameOrCode" resultMap="infoVo">
+        select `id`,`police_name`,`police_code`,`use_gun_status`
+        from t_police where 1=1
+        <if test="policeCode != null and policeCode != '' ">and instr(police_code,#{policeCode}) >0</if>
+        <if test="policeName != null and policeName != '' ">and instr(police_name,#{policeName}) >0</if>
+    </select>
+
+    <update id="updateUseGunStatus">
+      update t_police set use_gun_status = #{status} where id = #{id}
+    </update>
+
+    <resultMap id="uesrTypeVo" type="com.jingde.equipment.app.system.vo.UserTypeVO">
+        <result column="policeId" property="policeId"/>
+        <result column="userId" property="userId"/>
+        <result column="police_name" property="policeName"/>
+        <result column="police_code" property="policeCode"/>
+        <result column="office_id" property="officeId"/>
+        <result column="depart_id" property="departmentId"/>
+        <result column="department_name" property="departmentName"/>
+    </resultMap>
+
+    <select id="selectUseGunPoliceBypoliceName" resultMap="uesrTypeVo">
+        select p.id as policeId,p.police_code,p.police_name,u.id as
+        userId,p.department_name,p.depart_id from t_police p
+        left join t_police_equipment_used peu on p.police_code = peu.police_code
+        left join t_user u on p.id = u.police_id where p.use_gun_status = 0
+        <if test="policeName != null and policeName != '' ">and instr(p.police_name,#{policeName}) >0</if>
+        <if test="policeCode != null and policeCode != '' ">and instr(p.police_code,#{policeCode}) >0</if>
+    </select>
+
+    <update id="updateUseGunStatusByPeuId">
+        update t_police p inner join t_police_equipment_used peu on p.police_code = peu.police_code set p.use_gun_status
+        =#{status},peu.status = #{useStatus}
+        where peu.id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">#{item}</foreach>
+    </update>
+
+    <update id="updateDepartmentByDeptId">
+      update t_police set  department_name = #{dept.departmentName} where depart_id = #{dept.id}
+    </update>
+
+    <resultMap id="departmentPoliceVo" type="com.jingde.equipment.app.system.vo.DepartmentPoliceVO">
+        <result column="id" property="id"/>
+        <result column="police_code" property="policeCode"/>
+        <result column="police_name" property="policeName"/>
+        <result column="department" property="department"/>
+        <result column="parentLeaderLevel" property="parentLeaderLevel"/>
+        <result column="parentDepartment" property="parentDepartment"/>
+        <result column="parentId" property="parentId"/>
+        <result column="parentPoliceCode" property="parentPoliceCode"/>
+        <result column="parentpoliceName" property="parentpoliceName"/>
+    </resultMap>
+
+    <select id="findBydepartmentId" resultMap="departmentPoliceVo">
+        SELECT
+            p.id,
+            p.police_code,
+            p.police_name,
+            u1.police_id AS parentId,
+            u1.police_code AS parentPoliceCode,
+            u1.police_name AS parentpoliceName
+        FROM
+            t_police p
+            LEFT JOIN t_user u ON p.id = u.police_id
+            LEFT JOIN t_user u1 ON do2.id = u1.office_id
+        WHERE
+            p.depart_id = #{id}
+    </select>
+
+
+    <update id="updatePolice">
+        update t_police SET update_time=NOW()
+        <if test="condition.policeName != null and condition.policeName != '' ">,police_name=#{condition.policeName}
+        </if>
+        <if test="condition.policeCode != null and condition.policeCode != '' ">, police_code =
+            #{condition.policeCode}
+        </if>
+        <if test="condition.postId != null and condition.postId != '' ">, post_id =
+            #{condition.postId}
+        </if>
+        <if test="condition.postName != null and condition.postName != '' ">, post_name =
+            #{condition.postName}
+        </if>
+        <if test="condition.politicalStatus != null and condition.politicalStatus != '' ">, political_status =
+            #{condition.politicalStatus}
+        </if>
+        <if test="condition.nation != null and condition.nation != '' ">, nation = #{condition.nation}</if>
+        <if test="condition.photo != null and condition.photo != '' ">, photo = #{condition.photo}</if>
+        <if test="condition.mobile != null and condition.mobile != '' ">, mobile = #{condition.mobile}</if>
+        <if test="condition.mobileBak != null and condition.mobileBak != '' ">, mobile_bak = #{condition.mobileBak}</if>
+        <if test="condition.address != null and condition.address != '' ">, address = #{condition.address}</if>
+        <if test="condition.sex != null and condition.sex != '' ">, sex = #{condition.sex}</if>
+        <if test="condition.age != null and condition.age != '' ">, age = #{condition.age}</if>
+        <if test="condition.idCard != null and condition.idCard != '' ">, id_card = #{condition.idCard}</if>
+        <if test="condition.departId != null and condition.departId != '' ">, depart_id = #{condition.departId}</if>
+        <if test="condition.departmentName != null and condition.departmentName != '' ">, department_name =
+            #{condition.departmentName}
+        </if>
+        <if test="condition.status != null and condition.status != '' ">, status = #{condition.status}</if>
+        WHERE id = #{condition.id}
+    </update>
+
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.cabinets.dao.CabinetSeatLogMapper">
+
+    <update id="updateBackStatus">
+        update t_cabinet_open_seat_log
+        set status = #{status}
+        where seat_entity_id = #{seatEntityId}
+    </update>
+
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.apply.dao.FirearmsReturnBatchMapper">
+
+    <resultMap id="firearmsReturnBatchVo" type="com.jingde.equipment.app.apply.vo.FirearmsReturnBatchVo">
+        <result column="id" property="id"/>
+        <result column="apply_id" property="applyId"/>
+        <result column="keeping_person" property="keepingPerson"/>
+        <result column="keeping_person2" property="keepingPerson2"/>
+        <result column="confirm_person" property="confirmPerson"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectByApplyId" resultMap="firearmsReturnBatchVo">
+        select id,apply_id,keeping_person_id,keeping_person,keeping_person2_id,keeping_person2,confirm_person_id,confirm_person,create_time
+          from t_firearms_return_batch where apply_id = #{applyId}
+    </select>
+
+    <select id="selectByApplyIds" resultMap="firearmsReturnBatchVo">
+        select
+        id,apply_id,keeping_person_id,keeping_person,keeping_person2_id,keeping_person2,confirm_person_id,confirm_person,create_time
+        from t_firearms_return_batch where apply_id in
+        <foreach collection="list" open="(" separator="," index="index" item="item" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="insertByDto" useGeneratedKeys="true" keyProperty="id">
+        insert into t_firearms_return_batch (apply_id, keeping_person_id, keeping_person, keeping_person2_id, keeping_person2, confirm_person_id, confirm_person)
+        values (#{dto.applyId},#{dto.keepingPersonId},#{dto.keepingPerson},#{dto.keepingPerson2Id},#{dto.keepingPerson2},#{dto.confirmPersonId},#{dto.confirmPerson})
+    </insert>
+
+    <select id="selectMaxId" resultType="integer">
+        select max(id) as id from t_firearms_return_batch
+    </select>
+
+    <select id="selectByBatchId" resultMap="firearmsReturnBatchVo">
+      select id,apply_id,keeping_person_id,keeping_person,keeping_person2_id,keeping_person2,confirm_person_id,confirm_person,create_time
+          from t_firearms_return_batch where id = #{batchId}
+    </select>
+
+
+</mapper>

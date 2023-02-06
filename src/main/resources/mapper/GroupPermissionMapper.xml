@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.system.dao.GroupPermissionMapper">
+	<resultMap id="infoVo" type="com.jingde.equipment.app.system.vo.PermissionVO">
+		<result column="id" property="id"/>
+		<result column="permission_id" property="permissionId"/>
+		<result column="permission_note" property="permissionNote"/>
+		<result column="permission_url" property="permissionUrl"/>
+	</resultMap>
+
+	<select id="selectGroupJurisdictionPage" resultMap="infoVo">
+		SELECT gp.id,gp.permission_id,p.permission_note,p.permission_url FROM t_group_permission gp LEFT JOIN t_permission p ON gp.permission_id=p.id WHERE gp.group_id= #{id}
+	</select>
+
+	<delete id="deleteByGroupId">
+		delete from t_group_permission where group_id = #{id}
+	</delete>
+
+    <insert id="saveByGroupId">
+		insert into t_group_permission(group_id,permission_id) values
+		<foreach collection="condition.permissionIds" item="item"  separator="," >(#{condition.id},#{item})
+		</foreach>
+	</insert>
+
+	<select id="selectAllJurisdictionPage" resultMap="infoVo">
+		select id,permission_url,permission_note from t_permission order by sort
+	</select>
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.police.dao.PoliceEquipmentLogMapper">
+
+
+  <insert id="save">
+      INSERT INTO t_police_equipment_log
+        (issue_date,firearms_type,firearms_no,firearms_code,manager_status,used_log,change_result,note,manager_person) VALUES
+        (now(),#{condition.firearmsType},#{condition.firearmsNo},#{condition.firearmsCode},#{condition.managerStatus},#{condition.usedLog},#{condition.changeResult},#{condition.note},#{condition.managerPerson});
+  </insert>
+
+    <update id="auditing">
+        update t_police_equipment_log set manager_status = #{condition.status},auditing_person = #{condition.auditingPerson},auditing_date = #{condition.auditingDate} ,update_time = now()
+        where  manager_status = 0 and id in <foreach collection="condition.record" item="id" separator="," open="(" close=")">#{id} </foreach>
+    </update>
+
+    <update id="auditingAll">
+        update t_police_equipment_log set manager_status = #{condition.status},auditing_person = #{condition.auditingPerson},auditing_date = #{condition.auditingDate} ,update_time = now()
+        where  manager_status = 0
+    </update>
+
+    <resultMap id="policeEquipmenlogVo" type="com.jingde.equipment.app.police.vo.PoliceEquipmenlogVO">
+        <result column="id" property="id"/>
+        <result column="issue_date" property="date"/>
+        <result column="firearms_type" property="model"/>
+        <result column="firearms_no" property="gunNumber"/>
+        <result column="firearms_code" property="credentialsNumber"/>
+        <result column="manager_status" property="state"/>
+        <result column="used_log" property="trace"/>
+        <result column="change_result" property="condition"/>
+        <result column="note" property="remark"/>
+        <result column="manager_person" property="administrator"/>
+        <result column="auditing_person" property="verifier"/>
+        <result column="firearms_type_id" property="modelId"/>
+    </resultMap>
+
+    <select id="findPoliceEquipmenLogList" resultMap="policeEquipmenlogVo">
+      select
+          tg.id,tg.issue_date,tg.firearms_type,
+          tg.firearms_no,tg.firearms_code,tg.manager_status,
+          tg.used_log,tg.change_result,tg.note,
+          tg.manager_person,tg.auditing_person,tg.firearms_type_id
+      from t_police_equipment_log tg order by tg.id DESC
+  </select>
+
+   <select id="findPoliceEquipmenLogById" resultMap="policeEquipmenlogVo">
+      select
+          tg.id,tg.issue_date,tg.firearms_type,
+          tg.firearms_no,tg.firearms_code,tg.manager_status,
+          tg.used_log,tg.change_result,tg.note,
+          tg.manager_person,tg.auditing_person,tg.firearms_type_id
+      from t_police_equipment_log tg where id=#{id}
+  </select>
+
+  <select id="getfirearmsNoList" resultType="java.lang.String">
+      select firearms_no from t_police_equipment_log
+  </select>
+</mapper>

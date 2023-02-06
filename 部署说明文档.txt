@@ -1,0 +1,31 @@
+
+启动项目
+运行com.company.project.Application.java
+或
+mvn: spring-boot:run
+访问
+http://localhost:8080
+
+上传部署
+/home/test
+
+编译部署到服务器
+cd ~/project/equipment
+git pull origin dev
+mvn clean install
+然后可以看到生成的jar包
+cp target/spring-boot-api-civil-equipment-1.0.jar ~/
+先杀死之前的项目
+ps -ef|grep spring-boot-api-civil-equipment
+test     17694 14464 99 17:57 pts/4    00:00:09 java -jar /home/test/spring-boot-api-civil-equipment-1.0.jar
+test     17713 14464  0 17:58 pts/4    00:00:00 grep --color=auto spring-boot-api-civil-equipment
+kill -9 17694
+nohup java -jar ~/spring-boot-api-civil-equipment-1.0.jar > ~/spring-boot-api-civil-equipment.log 2>&1 &
+查看日志
+tail -f -n 2000 ~/spring-boot-api-civil-equipment.log
+
+访问以下
+http://47.107.180.247:7878/springboot-equipment-api/
+
+https://blog.csdn.net/yuhui123999/article/details/80593750
+

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.system.dao.GroupUserMapper">
+
+    <resultMap id="roleVo" type="com.jingde.equipment.app.system.vo.RoleVO"> <!--角色,用户-->
+		<result property="id" column="id"/>
+		<result property="policeCode" column="police_code"/>
+		<result property="policeName" column="police_name"/>
+		<result property="isSubAccount" column="is_sub_account"/>
+    </resultMap>
+
+	<resultMap id="permission" type="com.jingde.equipment.app.system.vo.PermissionVO">
+		<result property="id" column="id"/>
+		<result property="permissionName" column="permission_name"/>
+		<result property="permissionUrl" column="permission_url"/>
+		<result property="sort" column="sort"/>
+		<result property="permissionNote" column="permission_note"/>
+	</resultMap>
+
+	<select id="selectGroupUserById" resultMap="roleVo">
+		select pu.id,u.police_code,u.police_name,u.is_sub_account from t_user u LEFT JOIN  t_group_user pu on u.id = pu.user_id WHERE pu.group_id = #{id}
+	</select>
+
+	<delete id="deleteGroupUserByIds">
+		delete from t_group_user where id in <foreach collection="ids" item="item" open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+	<insert id="addGroupUser">
+		insert into t_group_user(user_id, group_id) values
+		<foreach collection="condition.userIds" item="item"  separator="," >(#{item},#{condition.id})
+		</foreach>
+	</insert>
+
+	<select id="selectUnGroupUserByGroupId" resultMap="roleVo">
+		SELECT id,police_code,police_name,is_sub_account from t_user WHERE
+			id not in (SELECT gu.user_id from t_group_user gu WHERE gu.group_id = #{condition.id} )
+			<if test="condition.policeCode != null and condition.policeCode != '' "> and instr(police_code,#{condition.policeCode}) >0</if>
+			<if test="condition.policeName != null and condition.policeName != '' "> and instr(police_name,#{condition.policeName}) >0</if>
+	</select>
+
+	<delete id="deleteGroupUserBygroupId">
+		delete from t_group_user where group_id in <foreach collection="ids" item="item" open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+
+    
+</mapper>

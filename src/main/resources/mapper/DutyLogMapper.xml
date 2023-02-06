@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.duty.dao.DutyLogMapper">
+
+  <resultMap id="infoVotMap" type="com.jingde.equipment.app.duty.vo.DutyLogVO">
+    <result column="id" property="id"/>
+    <result column="duty_date" property="dutyDate"/> <!--日期-->
+    <result column="duty_content" property="dutyContent"/> <!--统计情况-->
+    <result column="off_duty_person" property="offDutyPerson"/><!--交班人1-->
+      <result column="off_duty_person2" property="offDutyPerson2"/><!--交班人2-->
+      <result column="on_duty_person" property="onDutyPerson"/><!--接班人1-->
+      <result column="on_duty_person2" property="onDutyPerson2"/><!--接班人2-->
+    <result column="note" property="note"/> <!--备注-->
+    <result column="create_time" property="createTime"/>
+    <result column="update_time" property="updateTime"/>
+  </resultMap>
+
+  <select id="selectMaxId" resultMap="infoVotMap">
+      select duty_content,id,on_duty_person,on_duty_person2,off_duty_person,off_duty_person2 from t_duty_log order BY id desc  limit 0,1
+  </select>
+
+  <select id="selectListByPage" resultMap="infoVotMap">
+      select id,duty_date,duty_content,off_duty_person,off_duty_person2,on_duty_person,on_duty_person2,note from t_duty_log
+  </select>
+
+    <resultMap id="dutyLogVo" type="com.jingde.equipment.app.duty.vo.DutyLogVO">
+        <result column="id" property="id"/>
+        <result column="duty_date" property="date"/>
+        <result column="duty_content" property="dutyContent"/> <!--统计情况-->
+        <result column="off_duty_person" property="offDutyPerson"/><!--交班人1-->
+        <result column="off_duty_person2" property="offDutyPerson2"/><!--交班人2-->
+        <result column="on_duty_person" property="onDutyPerson"/><!--接班人1-->
+        <result column="on_duty_person2" property="onDutyPerson2"/><!--接班人2-->
+        <result column="duty_content" property="content"/>
+        <result column="note" property="notes"/>
+    </resultMap>
+   <select id="onDutyLogList" resultMap="dutyLogVo">
+       select id,duty_date,off_duty_person,off_duty_person2,on_duty_person,on_duty_person2,note,duty_content from t_duty_log order by id desc
+   </select>
+
+    <select id="lastDutyLog" resultMap="dutyLogVo">
+       select off_duty_person,off_duty_person2,on_duty_person,on_duty_person2,duty_content from t_duty_log order by id desc limit 1
+   </select>
+
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.system.dao.GroupMapper">
+
+    <resultMap id="roleVo" type="com.jingde.equipment.app.system.vo.RoleVO"> <!--角色,用户-->
+        <result property="id" column="id"/>
+        <result property="groupName" column="group_name"/>
+
+    </resultMap>
+
+
+	<select id="selectAllRole" resultMap="roleVo">
+		select id,group_name from t_group order by id desc
+	</select>
+
+    
+</mapper>

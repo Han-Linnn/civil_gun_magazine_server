@@ -1,0 +1,111 @@
+-- 民用枪弹管理系统初始化数据
+-- 1.职务表
+	INSERT INTO `t_post`(`id`, `post_name`, `parent_post_id`, `parent_post_name`, `post_level`, `create_time`, `update_time`) VALUES (1, '管理员', 0, NULL, NULL, '2020-04-21 16:10:28', '2020-04-21 16:10:28');
+-- 2.用户表
+	INSERT INTO `t_user`(`id`,`account`,`password`,`police_id`,`police_code`,`police_name`,`status`,`last_login_time`,`enable_sub_account`,`is_sub_account`,`is_son`,`sub_account_id`,`login_count`,`home_page`,`create_time`,`update_time`) VALUES (1,'000001','c8261859aed9043feeb860b8d873143e',1,'000001','管理员',1,NULL,0,0,1,NULL,0,'2','2020-04-21 16:06:47', '2020-04-21 18:15:58');	
+-- 3.警员表
+	INSERT INTO `t_police`(`id`, `police_name`, `police_code`, `firearm_code`, `firearm_code_publish`, `political_status`, `nation`, `photo`, `mobile`, `mobile_bak`, `address`, `sex`, `age`, `id_card`, `depart_id`, `department_name`, `post_name`, `post_id`, `status`, `annual_verification`, `gun_code`, `use_gun_status`) VALUES (1, '管理员', '000001', NULL, '2020-04-21', '党员', '汉族', 'http://120.236.144.251:9581/files/20200421/6b0917f6-793b-4887-bf7f-adefd148c3fa.jpg', '13800010001', NULL, NULL, 1, 20, '440825201904180559', 1, '管理部', '管理员', 1, 1, NULL, NULL, 0);
+-- 4.用户组表
+	INSERT INTO `t_group`(`id`, `group_name`, `status`, `create_time`, `update_time`) VALUES (1, '管理员组', 1, '2020-04-21 16:04:07', '2020-04-21 16:04:07');
+-- 5.权限表
+	INSERT INTO `t_permission`(`id`, `permission_name`, `permission_url`, `permission_note`, `sort`, `create_time`, `update_time`) VALUES (1, 'applyLog:examine', '/api/apply/approval', '领用申请审批', 1, '2020-07-08 17:49:52', '2020-07-08 17:49:57');
+	INSERT INTO `t_permission`(`id`, `permission_name`, `permission_url`, `permission_note`, `sort`, `create_time`, `update_time`) VALUES (2, 'firearms:scanOut', '/api/apply/scan/out', '枪支出库', 2, '2020-07-10 14:37:26', '2020-07-22 10:39:52');
+	INSERT INTO `t_permission`(`id`, `permission_name`, `permission_url`, `permission_note`, `sort`, `create_time`, `update_time`) VALUES (3, 'firearms:scanCome', '/api/apply/scan/come', '枪支入库', NULL, '2020-07-22 10:39:29', '2020-07-22 10:39:29');
+-- 6.用户组用户关系表
+	INSERT INTO `t_group_user`(`id`, `user_id`, `group_id`, `create_time`, `update_time`) VALUES (1, 1, 1, '2020-04-21 16:12:45', '2020-04-21 16:12:45');
+-- 7.用户组权限表
+	INSERT INTO `t_group_permission`(`id`, `permission_id`, `group_id`, `create_time`, `update_time`) VALUES (1, '1', 1, '2020-04-21 16:18:22', '2020-04-21 16:18:22');
+	INSERT INTO `t_group_permission`(`id`, `permission_id`, `group_id`, `create_time`, `update_time`) VALUES (2, '2', 1, '2020-04-21 16:18:31', '2020-04-21 16:19:37');
+	INSERT INTO `t_group_permission`(`id`, `permission_id`, `group_id`, `create_time`, `update_time`) VALUES (3, '3', 1, '2020-04-21 16:18:48', '2020-04-21 16:19:42');
+-- 8.用户组资源表
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (1, '/account', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (2, '/account/settings/Info', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (3, '/registrationList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (4, '/registrationList/equipment', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (5, '/registrationList/ammunitionChange', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (6, '/registrationList/equimentDetail', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (7, '/registrationList/maintenance', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (8, '/registrationList/receive', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (9, '/registrationList/saveCheckList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (10, '/registrationList/saveCheck', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (11, '/registrationList/GunPersonnel', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (12, '/registrationList/CreateEquiment', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (13, '/registration', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (14, '/registration/RecordApplyList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (15, '/registration/handoverList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (16, '/registration/entryAndExitList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (17, '/registration/maintainList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (18, '/securityCheck', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (19, '/securityCheck/securityCheckList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (20, '/securityCheck/securityCheckDetails', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (21, '/BulletCabinetMgnt', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (22, '/BulletCabinetMgnt/GunTypeList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (23, '/BulletCabinetMgnt/AmmunitionList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (24, '/BulletCabinetMgnt/CabinetList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (25, '/BulletCabinetMgnt/AvailableCabinetList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (26, '/BulletCabinetMgnt/OpenLogList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (27, '/privilege', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (28, '/privilege/DepartmentList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (29, '/privilege/JobList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (30, '/privilege/UserList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (31, '/privilege/privilegeList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (32, '/privilege/privilegeProfile', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (33, '/privilege/PrivilegeUserList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (34, '/privilege/UserListProfile', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (35, '/privilege/BadRecordList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (36, '/privilege/YearlyInspectionList', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+    INSERT INTO `t_group_menu`(`id`, `permission_url`, `group_id`, `create_time`, `update_time`) VALUES (37, '/', 1, '2020-04-21 16:21:49', '2020-04-21 16:21:49');
+-- 8.部门表
+    INSERT INTO `t_department`(`id`, `department_name`, `note`, `status`, `create_time`, `update_time`) VALUES (1, '管理员部门', '管理员', 1, '2020-07-28 14:47:53', '2020-07-28 14:47:53');
+
+-- 2020/7/10
+-- 枪炮统计数据
+CREATE OR REPLACE VIEW t_firearms_statistics_view
+AS
+SELECT
+	firearm_type_id,
+	SUM(sum) AS sum, SUM(no_receive) AS no_receive,SUM(in_stock) AS in_stock,
+	SUM(out_stock) AS out_stock, SUM(wait_upkeep) AS wait_upkeep,
+	SUM(start_upkeep) AS start_upkeep, SUM(malfunction) AS malfunction
+FROM
+(
+	SELECT IFNULL(COUNT(1),0) AS sum, 0 AS in_stock, 0 AS out_stock, 0 AS wait_upkeep, 0 AS start_upkeep, 0 AS malfunction, 0 AS no_receive, firearm_type_id
+	FROM t_firearms
+	GROUP BY firearm_type_id
+	UNION ALL
+	SELECT 0 AS sum, IFNULL(COUNT(1),0) AS in_stock, 0 AS out_stock, 0 AS wait_upkeep, 0 AS start_upkeep, 0 AS malfunction, 0 AS no_receive, firearm_type_id
+	FROM t_firearms
+	WHERE `status`= 0
+	GROUP BY firearm_type_id
+	UNION ALL
+	SELECT 0 AS sum, 0 AS in_stock, IFNULL(COUNT(1),0) AS out_stock, 0 AS wait_upkeep, 0 AS start_upkeep, 0 AS malfunction, 0 AS no_receive, firearm_type_id
+	FROM t_firearms
+	WHERE `status`= 1
+	GROUP BY firearm_type_id
+	UNION ALL
+	SELECT 0 AS sum, 0 AS in_stock, 0 AS out_stock, IFNULL(COUNT(1),0) AS wait_upkeep, 0 AS start_upkeep, 0 AS malfunction, 0 AS no_receive, firearm_type_id
+	FROM t_firearms
+	WHERE `status`= 2
+	GROUP BY firearm_type_id
+	UNION ALL
+	SELECT 0 AS sum, 0 AS in_stock, 0 AS out_stock, 0 AS wait_upkeep, IFNULL(COUNT(1),0) AS start_upkeep, 0 AS malfunction, 0 AS no_receive, firearm_type_id
+	FROM t_firearms
+	WHERE `status`= 3
+	GROUP BY firearm_type_id
+	UNION ALL
+	SELECT 0 AS sum, 0 AS in_stock, 0 AS out_stock, 0 AS wait_upkeep, 0 AS start_upkeep, IFNULL(COUNT(1),0) AS malfunction, 0 AS no_receive, firearm_type_id
+	FROM t_firearms
+	WHERE `status`= 4
+	GROUP BY firearm_type_id
+	UNION ALL
+	SELECT 0 AS sum, 0 AS in_stock, 0 AS out_stock, 0 AS wait_upkeep, 0 AS start_upkeep, 0 AS malfunction, IFNULL(SUM(p.no_receive),0) AS no_receive, p.firearm_type_id
+	FROM(
+		SELECT
+			(fatl.apply_firearm_count - fatl.received_firearm_count - fatl.returned_firearm_count) AS no_receive,
+			fatl.firearm_type_id
+		FROM t_firearms_apply_type_log fatl
+		INNER JOIN t_firearms_apply_log fal
+		ON fatl.apply_id = fal.id
+		WHERE fal.status NOT IN('02', '03','04','06')
+	)p GROUP BY p.firearm_type_id
+)t GROUP BY firearm_type_id

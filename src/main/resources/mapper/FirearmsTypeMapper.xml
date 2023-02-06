@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.firearms.dao.FirearmsTypeMapper">
+
+    <resultMap id="lableVotMap" type="com.jingde.equipment.app.firearms.vo.TypeTitleVO">
+        <result column="id" property="id"/>
+        <result column="type" property="type"/> <!--类型-->
+        <result column="firearms_type" property="name"/>
+
+    </resultMap>
+
+    <resultMap id="typeVotMap" type="com.jingde.equipment.app.cabinets.vo.TypeVO">
+        <result column="id" property="id"/>
+        <result column="cause" property="cause"/>
+        <result column="total" property="total"/>
+        <result column="content" property="text"/>
+        <result column="register_date" property="registerDate"/>
+        <result column="register_name" property="registerName"/>
+    </resultMap>
+
+    <select id="findByStatus" resultMap="lableVotMap">
+        select id, firearms_type,type
+        from t_firearms_type
+        where status = #{status}
+    </select>
+
+    <resultMap id="firearmsTypeTitle" type="com.jingde.equipment.app.duty.vo.FirearmsTypeTitleVO">
+        <result column="id" property="id"/>
+        <result column="firearms_type" property="title"/>
+    </resultMap>
+    <select id="firearmsTypeTitle" resultMap="firearmsTypeTitle">
+        select id, firearms_type
+        from t_firearms_type
+        where status = #{status}
+    </select>
+
+
+    <!--  枪支类型列表  -->
+    <resultMap id="firearmAmmoListMap" type="com.jingde.equipment.app.firearms.vo.AmmoFirearmVO">
+        <result column="ammo_id" property="ammoId"/>
+        <result column="ammo_type" property="ammoType"/>
+    </resultMap>
+    <resultMap id="listMap" type="com.jingde.equipment.app.firearms.vo.FirearmsTypeVO">
+        <result column="id" property="id"/>
+        <result column="firearms_type" property="firearmsType"/>
+        <result column="type" property="type"/>
+        <result column="note" property="note"/>
+        <result column="status" property="status"/>
+        <result column="register_date" property="registerDate"/>
+        <result column="register_person" property="registerPerson"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="level_type" property="levelType"/>
+        <result column="sum" property="sum"/>
+        <result column="no_receive" property="noReceive"/>
+        <result column="can_apply" property="canApply"/>
+        <result column="out_stock" property="outStock"/>
+        <collection property="ammoFirearmList"
+                    fetchType="lazy"
+                    select="findFirearmAmmoType"
+                    column="{firearmId=id}"
+        />
+    </resultMap>
+
+    <select id="firearmsTypeList" resultMap="listMap">
+        SELECT
+             tft.id,
+             tft.firearms_type,
+             tft.type,
+             tft.note,
+             tft.status,
+             tft.register_date,
+             tft.register_person,
+             tft.create_time,
+             tft.update_time,
+             fsv.sum,
+             fsv.no_receive,
+            (fsv.sum - fsv.no_receive) as can_apply,
+             fsv.out_stock
+        FROM t_firearms_type tft
+        LEFT JOIN t_firearms_statistics_view fsv
+        ON tft.id = fsv.firearm_type_id
+    </select>
+
+    <select id="findFirearmAmmoType" resultMap="firearmAmmoListMap">
+        select taf.ammo_id,taf.ammo_type from t_ammo_firearm taf where taf.firearm_id = #{firearmId}
+    </select>
+
+    <resultMap id="info" type="com.jingde.equipment.app.firearms.vo.FirearmsTypeVO">
+        <result column="id" property="id"/>
+        <result column="firearms_type" property="firearmsType"/>
+        <result column="type" property="type"/>
+        <result column="note" property="note"/>
+        <result column="status" property="status"/>
+        <result column="register_date" property="registerDate"/>
+        <result column="register_person" property="registerPerson"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="level_type" property="levelType"/>
+    </resultMap>
+
+    <select id="selectListByCondition" resultMap="info">
+        select id,firearms_type,type from t_firearms_type where 1=1
+        <if test="type != null and type != ''">and type = #{type}</if>
+        <if test="firearmsType != null and firearmsType != ''">and instr(firearms_type,#{firearmsType}) > 0</if>
+    </select>
+
+</mapper>

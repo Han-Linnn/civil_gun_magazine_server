@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.firearms.dao.AmmoFirearmMapper">
+
+  <resultMap id="ammoFirearmVO" type="com.jingde.equipment.app.firearms.vo.AmmoFirearmVO">
+    <result column="id" property="id"/>
+    <result column="ammo_type" property="ammoType"/>
+    <result column="number" property="number"/>
+    <result column="type" property="type"/>
+    <result column="firearm_id" property="firearmId"/>
+  </resultMap>
+
+  <select id="selectList" resultMap="ammoFirearmVO" >
+    SELECT tat.id,tat.ammo_type,tat.number,tat.type FROM t_ammo_firearm taf left join t_ammo_type tat on taf.ammo_id = tat.id where tat.id is not null
+    <if test="type != null and type != ''">and tat.type = #{type}</if>
+    <if test="firearmsTypeId != null and firearmsTypeId != ''">and taf.firearm_id = #{firearmsTypeId}</if>
+    <if test="ammoType != null and ammoType != ''">and  instr(tat.ammo_type, #{ammoType}) > 0</if>
+  </select>
+
+  <select id="selectListByIds" resultMap="ammoFirearmVO" >
+      SELECT tat.id,tat.ammo_type,tat.type,taf.firearm_id FROM t_ammo_firearm taf left join t_ammo_type tat on taf.ammo_id = tat.id where tat.id is not null and taf.firearm_id in
+        <foreach collection="list" open="(" separator="," item="item" index="index" close=")">#{item}</foreach>
+  </select>
+
+    <resultMap id="ammoFirearm" type="com.jingde.equipment.model.AmmoFirearm">
+      <result column="id" property="id"/>
+      <result column="ammo_id" property="ammoId"/>
+      <result column="ammo_type" property="ammoType"/>
+      <result column="firearm_id" property="firearmId"/>
+      <result column="firearm_type" property="firearmType"/>
+    </resultMap>
+    <select id="listByAmmoId" resultMap="ammoFirearm">
+      select id,ammo_id,ammo_type,firearm_id,firearm_type from t_ammo_firearm where ammo_id = #{ammoId}
+    </select>
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.system.dao.AnnualInspectionMapper">
+
+    <resultMap id="infoVo" type="com.jingde.equipment.app.police.vo.PoliceAnnualInspectionVO">
+        <result column="id" property="id"/>
+        <result column="date" property="date"/>
+        <result column="status" property="status"/>
+        <result column="police_id" property="policeId"/>
+        <result column="police_name" property="policeName"/>
+        <result column="police_code" property="policeCode"/>
+    </resultMap>
+
+    <select id="findByPage" resultMap="infoVo">
+      select pai.id,pai.date,pai.status,pai.police_id,p.police_name,p.police_code from t_police_annual_inspection pai LEFT JOIN t_police p on pai.police_id = p.id order BY pai.id desc
+    </select>
+
+    <insert id="add">
+        insert into t_police_annual_inspection(status,date,police_id) values (#{condition.status},#{condition.date},#{condition.policeId})
+    </insert>
+
+    <select id="findByPoliceId" resultMap="infoVo">
+          select id,date,status from t_police_annual_inspection where police_id = #{policeId}
+        <if test="status != null and status.length() > 0 and status != '' ">
+            <![CDATA[
+				and instr(status,#{status}) > 0
+				]]>
+        </if>
+    </select>
+
+    <select id="findOneById" resultMap="infoVo">
+        select pai.id,pai.date,pai.status,pai.police_id,p.police_name,p.police_code from t_police_annual_inspection pai LEFT JOIN t_police p on pai.police_id = p.id WHERE p.id = #{id}
+    </select>
+
+</mapper>

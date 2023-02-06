@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.security.dao.SignLogMapper">
+  <resultMap id="BaseResultMap" type="com.jingde.equipment.model.SignLog">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="product_department" jdbcType="VARCHAR" property="productDepartment" />
+    <result column="check_department" jdbcType="VARCHAR" property="checkDepartment" />
+    <result column="check_name" jdbcType="VARCHAR" property="checkName" />
+    <result column="check_date" jdbcType="VARCHAR" property="checkDate" />
+    <result column="department" jdbcType="VARCHAR" property="department" />
+    <result column="sign_name" jdbcType="VARCHAR" property="signName" />
+    <result column="status" jdbcType="BIT" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="principal" jdbcType="VARCHAR" property="principal" />
+    <result column="problem" jdbcType="VARCHAR" property="problem" />
+    <result column="submit_date" jdbcType="VARCHAR" property="submitDate" />
+    <result column="to_department" jdbcType="VARCHAR" property="toDepartment" />
+    <result column="content" jdbcType="LONGVARCHAR" property="content" />
+  </resultMap>
+
+  <resultMap id="comeOutlogVo" type="com.jingde.equipment.app.security.vo.SignLogVO">
+    <result column="id" property="id"/>
+    <result column="check_department" property="inspectUnit"/>
+    <result column="check_name" property="inspectors"/>
+    <result column="check_date" property="inspectDate"/>
+    <result column="department" property="beInspectUnit"/>
+    <result column="sign_name" property="personInCharge"/>
+    <result column="problem" property="description"/>
+    <result column="submit_date" property="rectificationDate"/>
+    <result column="to_department" property="reportUnit"/>
+    <result column="content" property="list"/>
+    <result column="problem" property="description"/>
+    <result column="submit_date" property="rectificationDate"/>
+  </resultMap>
+  <select id="findSignById" resultMap="comeOutlogVo">
+      select
+        tg.id,tg.check_department,tg.check_name,
+        tg.check_date,tg.department,tg.sign_name,
+        tg.problem,tg.submit_date,tg.to_department,
+        tg.content
+      from
+        t_sign_log tg
+      where tg.id=#{id}
+  </select>
+
+  <select id="findSignList" resultMap="comeOutlogVo">
+      select
+        tg.id,tg.check_department,tg.check_date,tg.department,problem,submit_date
+      from
+        t_sign_log tg where status=#{status}
+      order by tg.id desc
+  </select>
+
+</mapper>

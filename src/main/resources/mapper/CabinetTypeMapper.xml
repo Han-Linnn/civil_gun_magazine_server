@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.cabinets.dao.CabinetTypeMapper">
+
+    <resultMap id="cabinet" type="com.jingde.equipment.model.Cabinet">
+        <result property="id" column="id"/>
+        <result property="cabinetName" column="cabinet_name"/>
+        <result property="cabinetCode" column="cabinet_code"/>
+    </resultMap>
+
+    <select id="cabinetSelect" resultMap="cabinet">
+        select id,cabinet_name,cabinet_code from t_cabinet where status=#{status}
+    </select>
+
+    <resultMap id="istData" type="com.jingde.equipment.app.system.vo.clean.ListDataVO">
+        <result column="id" property="id"/>
+        <result column="cabinet_code" property="cabinetCode"/>
+    </resultMap>
+    <select id="cabinetFirearmsDeatils" resultMap="istData">
+        select distinct cabinet_code from t_cabinet_detail where cabinet_code in
+        (
+            <foreach collection="codes" item="code" index="index" separator=",">
+                #{code}
+            </foreach>
+        )
+    </select>
+
+    <resultMap id="firearmsData" type="com.jingde.equipment.app.system.vo.clean.FirearmsDataVO">
+        <result column="cabinet_code" property="cabinetCode"/>
+        <result column="firearms_type" property="model"/>
+        <result column="number" property="number"/>
+    </resultMap>
+    <select id="firearmsDeatils" resultMap="firearmsData">
+        select cabinet_code,firearms_type,count(firearms_type_id) as number
+        from t_cabinet_detail
+        where cabinet_code in
+        (
+          <foreach collection="codes" item="code" separator=",">
+              #{code}
+          </foreach>
+        )
+        GROUP BY firearms_type,firearms_type_id,cabinet_code
+    </select>
+
+</mapper>

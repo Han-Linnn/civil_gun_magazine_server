@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.police.dao.PoliceEquipmenusedMapper">
+
+    <resultMap id="pageVotMap" type="com.jingde.equipment.app.police.vo.PolicePageVO">
+        <result column="id" property="id"/>
+        <result column="police_name" property="policeName"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="nation" property="nation"/>
+        <result column="political_status" property="politicalStatus"/>
+        <result column="police_code" property="policeCode"/>
+        <result column="department_name" property="departmentName"/>
+        <result column="leader_level" property="leaderLevel"/>
+        <result column="address" property="address"/>
+        <result column="mobile" property="mobile"/>
+        <result column="firearm_code" property="firearmCode"/>
+        <result column="firearm_code_publish" property="firearmCodePublish"/>
+        <result column="annual_verification" property="annualVerification"/>
+        <result column="reason" property="reason"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    
+    <select id="selectPageBytype" resultMap="pageVotMap">
+      SELECT
+        peu.id,p.police_name,p.sex,p.age,
+        p.nation,p.job,p.political_status,p.police_code,p.department_name,
+        p.address,p.mobile,p.firearm_code,p.firearm_code_publish,p.annual_verification,peu.reason
+      from t_police_equipment_used peu
+      LEFT JOIN t_police p ON peu.police_code = p.police_code
+      WHERE peu.`status` =  ${type}
+      order by peu.id desc
+  </select>
+    
+    <select id="selectOneByPoliceCode" resultMap="pageVotMap">
+        select * from t_police_equipment_used where police_code = #{policeCode}
+    </select>
+
+    <delete id="deleteByPoliceId">
+    delete peu from t_police_equipment_used peu INNER JOIN  t_police p on peu.police_code= p.police_code  where  p.id = #{id}
+  </delete>
+    
+    <update id="saveOrUpdateBypoliceCode">
+        INSERT INTO t_police_equipment_used (police_code,reason,`status`) VALUES (#{model.policeCode},#{model.reason},#{model.status})  ON DUPLICATE KEY UPDATE reason= #{model.reason},`status` = #{model.status};
+    </update>
+</mapper>

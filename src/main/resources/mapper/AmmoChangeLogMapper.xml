@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.firearms.dao.AmmoChangeLogMapper">
+
+  <resultMap id="typeVotMap" type="com.jingde.equipment.app.cabinets.vo.TypeVO">
+    <result column="id" property="id"/>
+    <result column="cause" property="cause"/>
+    <result column="total" property="total"/>
+    <result column="content" property="text"/>
+    <result column="register_date" property="registerDate"/>
+    <result column="register_name" property="registerName"/>
+  </resultMap>
+
+  <select id="selectRegistrationChange" resultMap="typeVotMap">
+    select id,cause,total,content,register_date,register_name from t_ammo_change_log order by id desc
+  </select>
+
+  <select id="selectMaxId" resultMap="typeVotMap">
+    SELECT id,total,content  from t_ammo_change_log ORDER BY id desc LIMIT 0,1
+  </select>
+
+  <insert id="saveLog">
+      INSERT INTO t_ammo_change_log (cause,total,content,register_date,register_name) VALUES
+      (#{condition.cause},#{condition.total},#{condition.content},#{condition.registerDate},#{condition.registerName});
+  </insert>
+
+  <update id="updateContentbyId">
+    UPDATE t_ammo_change_log SET update_time=NOW()
+    <if test="condition.registerDate != null and condition.registerDate != '' ">, register_date = #{condition.registerDate}</if>
+    <if test="condition.cause != null and condition.cause != '' ">, cause = #{condition.cause}</if>
+    <if test="condition.content != null and condition.content != '' and condition.total !=null">,content=#{condition.content},total = #{condition.total} </if>
+    WHERE id = #{condition.id}
+  </update>
+
+  <select id="findById" resultMap="typeVotMap">
+    SELECT id,total,content  from t_ammo_change_log where id = #{id}  LIMIT 0,1
+  </select>
+
+</mapper>

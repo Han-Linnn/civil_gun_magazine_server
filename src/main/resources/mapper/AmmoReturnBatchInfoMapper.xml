@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.apply.dao.AmmoReturnBatchInfoMapper">
+
+
+    <insert id="insertByList">
+        insert into t_ammo_return_batch_info (apply_id, apply_type_id, firearm_type_id, firearm_type, ammo_type_id,
+        ammo_type,returned_ammo_count, return_batch_id) values
+        <foreach collection="list" open="" item="item" index="index" separator="," close="">
+            (#{item.applyId},#{item.id},#{item.firearmTypeId},#{item.firearmType},#{item.ammoTypeId},#{item.ammoType},#{item.returnedAmmoCount},#{item.returnBatchId})
+        </foreach>
+    </insert>
+
+    <resultMap id="ammoReturnBatchInfo" type="com.jingde.equipment.model.AmmoReturnBatchInfo">
+        <result column="id" property="id"/>
+        <result column="apply_id" property="applyId"/>
+        <result column="apply_type_id" property="applyTypeId"/>
+        <result column="firearm_type_id" property="firearmTypeId"/>
+        <result column="firearm_type" property="firearmType"/>
+        <result column="ammo_type" property="ammoType"/>
+        <result column="ammo_type_id" property="ammoTypeId"/>
+        <result column="return_batch_id" property="returnBatchId"/>
+        <result column="returned_ammo_count" property="returnedAmmoCount"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectByBatchId" resultMap="ammoReturnBatchInfo">
+        select id,apply_id,apply_type_id,firearm_type,ammo_type,returned_ammo_count,create_time from t_ammo_return_batch_info where return_batch_id = #{batchId}
+    </select>
+
+</mapper>

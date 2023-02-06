@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.department.dao.DepartmentMapper">
+
+  <resultMap id="infoVo" type="com.jingde.equipment.app.system.vo.DepartmentVO">
+    <result column="id" property="id"/>
+    <result column="department_name" property="departmentName"/>
+    <result column="status" property="status"/>
+    <result column="note" property="note"/>
+    <result column="create_time" property="createTime"/>
+    <result column="update_time" property="updateTime"/>
+  </resultMap>
+
+ <select id="findById" resultMap="infoVo">
+  select id,department_name,note,status from t_department where id = #{id} limit 0,1
+ </select>
+
+    <select id="departmentPage" resultMap="infoVo">
+      SELECT id,department_name,note,status,create_time,update_time FROM t_department
+        <where>
+            <if test="condition.departmentName != null and condition.departmentName.length() > 0 and condition.departmentName != '' ">
+                <![CDATA[
+				and instr(department_name,#{condition.departmentName}) > 0
+				]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectIdByName" resultType="java.lang.String">
+        SELECT
+          id
+        FROM t_department
+        WHERE department_name=#{name} limit 0,1
+    </select>
+
+</mapper>

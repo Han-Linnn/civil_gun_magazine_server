@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.apply.dao.FirearmsApplyLogMapper">
+
+    <resultMap id="firearmsApplyLogVo" type="com.jingde.equipment.app.apply.vo.FirearmsApplyLogVo">
+        <result column="id" property="id"/>
+        <result column="apply_date" property="applyDate"/>
+        <result column="apply_person" property="applyPerson"/>
+        <result column="apply_reason" property="applyReason"/>
+        <result column="auditing_date" property="auditingDate"/>
+        <result column="auditing_person" property="auditingPerson"/>
+        <result column="delay_approver" property="delayApprover"/>
+        <result column="return_date" property="returnDate"/>
+        <result column="status" property="status"/>
+        <result column="note" property="note"/>
+
+    </resultMap>
+    <insert id="insertByForm" useGeneratedKeys="true" keyProperty="id">
+        insert into t_firearms_apply_log(apply_date, apply_reason, apply_person_id, apply_person, return_date,first_return_date)
+        values (#{form.applyDate},#{form.applyReason},#{form.applyPersonId},#{form.applyPerson},#{form.returnDate},#{form.returnDate})
+    </insert>
+
+    <update id="updateFormById">
+        update t_firearms_apply_log set apply_date = #{form.applyDate},apply_reason = #{form.applyReason},return_date = #{form.returnDate},
+          auditing_person_id = #{form.auditingPersonId},auditing_person = #{form.auditingPerson},first_return_date = #{form.returnDate}
+          where id = #{form.id}
+    </update>
+
+    <select id="selectMaxId" resultType="integer">
+        select max(id) as id from t_firearms_apply_log
+    </select>
+
+    <update id="updateApprovalById">
+        update t_firearms_apply_log set auditing_person_id = #{form.auditingPersonId},auditing_person = #{form.auditingPerson},status = #{form.status},note = #{form.note} where id = #{form.id}
+    </update>
+
+    <select id="findInfoById" resultMap="firearmsApplyLogVo">
+        select id,apply_date,apply_person,apply_reason,auditing_date,auditing_person,delay_approver,return_date,`status`,`note` from t_firearms_apply_log where id = #{id}
+    </select>
+
+    <select id="selectPageByCondition" resultMap="firearmsApplyLogVo">
+         select id,apply_date,apply_person,apply_reason,auditing_date,auditing_person,delay_approver,return_date,`status`,`note` from t_firearms_apply_log
+          where
+            1=1
+          <if test="dto.status != null and dto.status !=''"> and status = #{dto.status}</if>
+          <if test="dto.startDate != null and dto.startDate != ''">and DATE_FORMAT(apply_date,'%Y-%m-%d') >= #{dto.startDate}</if>
+          <if test="dto.endDate != null and dto.endDate != ''"> <![CDATA[and DATE_FORMAT(apply_date,'%Y-%m-%d') <= #{dto.endDate} ]]></if>
+        order by id desc
+    </select>
+
+    <resultMap id="getFirearmsLogVO" type="com.jingde.equipment.app.apply.vo.FirearmsLogVO">
+        <id property="id" column="id" />
+        <result property="applyDate" column="apply_date" />
+        <result property="lastReceiveTime" column="lastReceiveTime" />
+        <result property="lastReturnTime" column="lastReturnTime" />
+        <collection property="firearmDeatilsList"
+                    fetchType="lazy"
+                    select="findFirearmsApplyType"
+                    column="{applyId=id}"
+        />
+        <collection property="ammoDeatilsList"
+                    fetchType="lazy"
+                    select="findAmmoApplyType"
+                    column="{applyId=id}"
+        />
+    </resultMap>
+
+    <resultMap id="getFirearmsLogDetailVO" type="com.jingde.equipment.app.apply.vo.FirearmsLogDetailVO">
+        <id property="id" column="id" />
+        <result property="firearmType" column="firearm_type" />
+        <result property="firearmNo" column="firearm_no" />
+        <result property="returnTime" column="returnTime" />
+        <result property="receiveTime" column="receiveTime"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <resultMap id="applyDetails" type="com.jingde.equipment.app.firearms.vo.ApplyDetails">
+        <id column="id" property="id" />
+        <result column="firearm_type_id" property="firearmTypeId" />
+        <result column="type" property="type" />
+        <result column="count" property="count" />
+        <result column="receivedCount" property="receivedCount" />
+        <result column="returnedCount" property="returnedCount" />
+    </resultMap>
+
+    <select id="getFirearmsLog" resultMap="getFirearmsLogVO">
+        SELECT
+            fal.id,fal.apply_date, MAX(frb.create_time) AS lastReceiveTime, MAX(frbn.create_time) AS lastReturnTime
+        FROM t_firearms_apply_log fal
+        LEFT JOIN  t_firearms_receive_batch frb ON fal.id = frb.apply_id
+        LEFT JOIN  t_firearms_return_batch frbn ON fal.id = frbn.apply_id
+        GROUP BY fal.id
+        ORDER BY fal.create_time DESC
+    </select>
+
+    <select id="getFirearmsLogDetail" resultMap="getFirearmsLogDetailVO">
+        SELECT
+            fat.id, fat.firearm_type, fat.firearm_no, MAX(frb.create_time) AS receiveTime, MAX(frbn.create_time) AS returnTime, tf.`status`
+        FROM t_firearms_apply_type_info fat
+        LEFT JOIN t_firearms_receive_batch frb ON fat.apply_id = frb.apply_id
+        LEFT JOIN t_firearms_return_batch frbn ON fat.apply_id = frbn.apply_id
+        LEFT JOIN t_firearms tf ON tf.firearm_no = fat.firearm_no
+        WHERE fat.apply_id = ${id}
+        GROUP BY fat.id
+        ORDER BY fat.create_time DESC
+    </select>
+
+    <update id="updateStatusById">
+        update t_firearms_apply_log set status = #{status} where id = #{id}
+    </update>
+
+</mapper>

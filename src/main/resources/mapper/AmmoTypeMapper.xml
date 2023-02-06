@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.firearms.dao.AmmoTypeMapper">
+
+    <resultMap id="lableVotMap" type="com.jingde.equipment.app.firearms.vo.TypeTitleVO">
+        <result column="id" property="id"/>
+        <result column="ammo_type" property="name"/>
+        <result column="type" property="type"/> <!--类型-->
+    </resultMap>
+
+    <select id="findByStatus" resultMap="lableVotMap">
+        select id, ammo_type,type
+        from t_ammo_type
+        where status = #{status}
+    </select>
+
+    <resultMap id="listMap" type="com.jingde.equipment.app.firearms.vo.AmmoTypeVO">
+        <result column="id" property="id"/>
+        <result column="ammo_type" property="ammoType"/>
+        <result column="note" property="note"/>
+        <result column="type" property="type"/>
+        <result column="number" property="number"/>
+        <result column="status" property="status"/>
+        <result column="register_date" property="registerDate"/>
+        <result column="register_person" property="registerPerson"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <collection property="ammoFirearmList"
+                    fetchType="lazy"
+                    select="findAmmoFirearmType"
+                    column="{ammoId=id}"
+        />
+    </resultMap>
+    
+    <select id="findAmmoType" resultMap="listMap">
+        select tat.id,
+               tat.ammo_type,
+               `type`,
+               `number`,
+               tat.note,
+               tat.status,
+               tat.register_date,
+               tat.register_person,
+               tat.create_time,
+               tat.update_time
+        from t_ammo_type tat
+    </select>
+
+    <!--  弹药类型列表  -->
+    <resultMap id="ammoFirearmsMap" type="com.jingde.equipment.app.firearms.vo.AmmoFirearmVO">
+        <result column="ammo_id" property="ammoId"/>
+        <result column="ammo_type" property="ammoType"/>
+        <result column="firearm_id" property="firearmId"/>
+        <result column="firearm_type" property="firearmType"/>
+    </resultMap>
+
+    <select id="findAmmoFirearmType" resultMap="ammoFirearmsMap">
+        select taf.firearm_id,
+               taf.firearm_type
+        from t_ammo_firearm taf
+        where taf.ammo_id = #{ammoId}
+    </select>
+
+    <update id="updateReduceCountByList">
+        <foreach collection="list" open="" index="index" item="item" separator=";" close="">
+            update t_ammo_type set number = number - #{item.number} where id = #{item.id}
+        </foreach>
+    </update>
+
+    <update id="updateIncreaseCountByList">
+        <foreach collection="list" open="" index="index" item="item" separator=";" close="">
+            update t_ammo_type set number = number + #{item.number} where id = #{item.id}
+        </foreach>
+    </update>
+    <update id="updateManyById">
+         update t_ammo_type set number = #{form.number},ammo_type = #{form.ammoType},note = #{form.note} where id = #{form.id}
+    </update>
+
+</mapper>

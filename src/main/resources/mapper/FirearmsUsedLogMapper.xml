@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.record.dao.FirearmsUsedLogMapper">
+
+    <resultMap id="lableVo" type="com.jingde.equipment.app.record.vo.LableVo">
+        <result column="key" property="key" />
+        <result column="value" property="value" javaType="java.lang.Integer"/>
+    </resultMap>
+
+    <select id="selectTotal" resultMap="lableVo">
+        SELECT '今日工单总数' as `key` , COUNT(id) as `value`  FROM t_firearms_used_log where DATE_FORMAT(apply_date,'%Y-%m-%d') = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT  '逾期未归还' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where  `status` = '03' and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')  and <![CDATA[ expected_return_date < now() ]]> UNION
+        SELECT '跨区用枪' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where is_inter_region = '1' and DATE_FORMAT(apply_date,'%Y-%m-%d') = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT '今日待审核' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where `status` = '01' and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT '今日待领取' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where `status` = '02' and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT '今日领枪中' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where `status` = '06' and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT '今日待还枪' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where `status` = '03' and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT '今日还枪中' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where (`status` = '07' or `status` = '08' ) and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT '今日已完成' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where `status` = '04' and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')  UNION
+        SELECT '今日已取消' as `key`  ,COUNT(id) as `value` FROM t_firearms_used_log where `status` = '09' and DATE_FORMAT(apply_date,'%Y-%m-%d')  = DATE_FORMAT(now(),'%Y-%m-%d')
+    </select>
+</mapper>

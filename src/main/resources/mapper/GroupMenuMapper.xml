@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.system.dao.GroupMenuMapper">
+
+    <resultMap id="roleVo" type="com.jingde.equipment.app.system.vo.RoleVO"> <!--角色,用户-->
+        <result property="policeCode" column="police_code"/>
+        <result property="policeName" column="police_name"/>
+    </resultMap>
+
+    <resultMap id="permission" type="com.jingde.equipment.app.system.vo.PermissionVO">
+        <result property="id" column="id"/>
+        <result property="permissionName" column="permission_name"/>
+        <result property="permissionUrl" column="permission_url"/>
+        <result property="sort" column="sort"/>
+        <result property="permissionNote" column="permission_note"/>
+    </resultMap>
+
+    <select id="selectedMenuRouter" resultType="java.lang.String">
+        select permission_url
+        from t_group_menu
+        where group_id = #{id}
+    </select>
+
+    <delete id="deleteByGroupId">
+        delete
+        from t_group_menu
+        WHERE group_id = #{id}
+    </delete>
+
+    <insert id="insertByGroupId">
+        insert into t_group_menu (permission_url,group_id) values
+        <foreach collection="condition.permissionUrls" item="item" separator=",">
+            (#{item},#{condition.id})
+        </foreach>
+    </insert>
+
+    <delete id="deleteGroupPermissionBygroupId">
+        delete from t_group_menu where group_id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">#{item}</foreach>
+    </delete>
+
+    <select id="selectedUserRouterByUserId" resultType="java.lang.String">
+        select distinct gm.permission_url
+        from t_group_menu gm
+                 left join t_group_user gu on gm.group_id = gu.group_id
+        where gu.user_id = #{id}
+    </select>
+
+</mapper>

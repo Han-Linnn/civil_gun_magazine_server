@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.cabinets.dao.CabinetSeatMapper">
+
+    <resultMap id="firearmNoResultMap" type="com.jingde.equipment.app.cabinets.vo.FirearmNoVO">
+        <result column="cabinet_id" property="cabinetId"/>
+        <result column="seat_type" property="seatType"/>
+        <result column="seat_entity_id" property="seatEntityId"/>
+        <result column="firearm_type" property="firearmType"/>
+        <result column="firearm_type_id" property="firearmTypeId"/>
+        <result column="firearm_no" property="firearmNo"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <resultMap id="ammoMap" type="com.jingde.equipment.app.firearms.vo.AmmoTypeVO">
+        <result column="id" property="id"/>
+        <result column="ammo_type" property="ammoType"/>
+        <result column="ammo_type_id" property="ammoTypeId"/>
+        <result column="ammo_count" property="count"/>
+    </resultMap>
+
+    <resultMap id="firearmMap" type="com.jingde.equipment.app.firearms.vo.FirearmsTypeVO">
+        <result column="id" property="id"/>
+        <result column="firearm_type" property="firearmsType"/>
+        <result column="firearm_type_id" property="firearmsTypeId"/>
+    </resultMap>
+
+    <!--  获取所有枪号  -->
+    <select id="getFireArmNoList" resultMap="firearmNoResultMap">
+        select cabinet_id,
+               seat_type,
+               seat_entity_id,
+               firearm_type,
+               firearm_no,
+               status
+        from t_cabinet_seat
+        where status = 1
+          and firearm_no is not null
+    </select>
+    <select id="selectGunNoByCondition" resultMap="firearmNoResultMap">
+        select cabinet_id,
+        seat_type,
+        seat_entity_id,
+        firearm_type,
+        firearm_no,
+        status
+        from t_cabinet_seat
+        where firearm_no is not null
+        <if test="status != null and status != ''"> and status = #{status}</if>
+        <if test="gunType != null and gunType != '' ">and firearm_type = #{gunType}</if>
+    </select>
+
+    <select id="availableList" resultMap="firearmMap">
+           select distinct cs.firearm_type, cs.firearm_type_id as id from t_cabinet_seat cs LEFT JOIN t_cabinet c on cs.cabinet_id = c.id  where  cs.firearm_no is not null and  cs.available = 1 and  cs.status = 1
+    </select>
+
+
+    <resultMap id="dto" type="com.jingde.equipment.app.cabinets.dto.CabinetSeatDTO">
+        <result column="id" property="id"/>
+        <result column="cabinet_id" property="cabinetId"/>
+        <result column="cabinet_name" property="cabinet"/>
+        <result column="seat_type" property="seatType"/>
+        <result column="seat_entity_id" property="seatEntityId"/>
+        <result column="seat_entity_index" property="seatEntityIndex"/>
+        <result column="firearm_type" property="firearmType"/>
+        <result column="firearm_type_id" property="firearmTypeId"/>
+        <result column="firearm_no" property="firearmNo"/>
+        <result column="ammo_type" property="ammoType"/>
+        <result column="ammo_type_id" property="ammoTypeId"/>
+        <result column="ammo_count" property="ammoCount"/>
+    </resultMap>
+
+
+    <select id="selectByCabinetId" resultMap="dto">
+        select c.id as
+        cabinet_id,c.cabinet_name,cs.id,cs.seat_type,cs.seat_entity_id,cs.seat_entity_index,cs.firearm_type,cs.firearm_type_id,cs.firearm_no
+        from t_cabinet_seat cs left join t_cabinet c on cs.cabinet_id = c.id
+        where cs.cabinet_id = #{cabinetId} and cs.firearm_type is not null
+        <if test="status != null and status != ''">and cs.status = #{status}</if>
+    </select>
+    <resultMap id="lableVo" type="com.jingde.equipment.app.cabinets.vo.LableVO">
+        <result column="type" property="type"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <select id="selectFirearmTotal" resultMap="lableVo">
+         SELECT firearm_type as `type`,count(id) as `count` from t_cabinet_seat where firearm_type IS NOT NULL and status ='1'  GROUP BY  firearm_type
+    </select>
+
+    <select id="selectAmmoTotal" resultMap="lableVo">
+        SELECT ammo_type as `type`,SUM(ammo_count) as `count` from t_cabinet_seat where ammo_type IS NOT NULL GROUP BY ammo_type
+    </select>
+
+</mapper>

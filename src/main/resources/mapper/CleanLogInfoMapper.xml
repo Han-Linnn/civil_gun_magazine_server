@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.repair.dao.CleanLogInfoMapper">
+    <resultMap id="infoVo" type="com.jingde.equipment.app.repair.vo.CleanLogInfoVo">
+        <result column="id" property="id"/>
+        <result column="clean_log_id" property="cleanLogId"/>
+        <result column="firearm_type_id" property="firearmTypeId"/>
+        <result column="firearm_type" property="firearmType"/>
+        <result column="firearm_no" property="firearmNo"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insertList">
+        insert into t_clean_log_info (clean_log_id,firearm_type_id, firearm_type, firearm_no) values
+        <foreach collection="list" open="" separator="," item="item" index="index" close="">
+            (#{logId},#{item.firearmTypeId},#{item.firearmType},#{item.firearmNo})
+        </foreach>
+        ;
+    </insert>
+
+    <select id="selectListMap" resultMap="infoVo">
+       SELECT  id,clean_log_id,firearm_type ,firearm_no,create_time,update_time from t_clean_log_info  where clean_log_id in <foreach
+            collection="list" open="(" index="index" item="item" separator="," close=")">#{item}</foreach>
+
+    </select>
+
+    <select id="selectListByCleanLogId" resultMap="infoVo">
+        SELECT  id,clean_log_id,firearm_type ,firearm_no,create_time,update_time from t_clean_log_info  where clean_log_id = #{cleanLogId}
+    </select>
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.firearms.dao.FirearmsMapper">
+    <insert id="insertFirearmsList">
+        INSERT INTO t_firearms(firearm_type_id,firearm_type,firearm_no,status)
+        VALUES
+        <foreach collection="firearmsList" item="bean" separator=",">
+            (
+            #{bean.firearmTypeId},
+            #{bean.firearmType},
+            #{bean.firearmNo},
+            #{bean.status}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateFirearmsStatus">
+        UPDATE t_firearms
+        SET `status` = #{status},expected_return_time = #{time}
+        WHERE firearm_no IN(
+        <foreach collection="list" item="firearmNo" separator=",">
+            #{firearmNo}
+        </foreach>
+        )
+    </update>
+
+    <resultMap id="firearmsTypeVO" type="com.jingde.equipment.app.firearms.vo.FirearmsTypeVO">
+        <result column="firearm_type_id" property="firearmsTypeId"/>
+        <result column="firearm_type" property="firearmsType"/>
+        <result column="number" property="canApply"/>
+    </resultMap>
+    <select id="selectByTimeAndId" resultMap="firearmsTypeVO">
+        select firearm_type_id,firearm_type,count(1) as number from t_firearms where status = 0 or
+        ( status = 1 and <![CDATA[expected_return_time <= #{time}]]>)
+        <if test="typeId != null and typeId != ''">and firearm_type_id = #{typeId}</if>
+        group by firearm_type_id
+    </select>
+
+    <resultMap id="firearmsVo" type="com.jingde.equipment.model.Firearms">
+        <result column="id" property="id"/>
+        <result column="firearm_type_id" property="firearmTypeId"/>
+        <result column="firearm_type" property="firearmType"/>
+        <result column="firearm_no" property="firearmNo"/>
+        <result column="status" property="status"/>
+        <result column="expected_return_time" property="expectedReturnTime"/>
+    </resultMap>
+
+    <select id="selectApplyList" resultMap="firearmsTypeVO">
+        select id,firearm_type_id,firearm_type,firearm_no,status from t_firearms where status = 0 or
+        ( status = 1 and <![CDATA[expected_return_time <= #{time}]]>)
+        <if test="typeId != null and typeId != ''">and firearm_type_id = #{typeId}</if>
+    </select>
+
+    <select id="findInfoByCode" resultMap="firearmsVo">
+          select id,firearm_type_id,firearm_type,firearm_no,status,expected_return_time from t_firearms where firearm_no = #{qrCode} limit 1
+    </select>
+
+    <resultMap id="firearmsDataVO" type="com.jingde.equipment.app.duty.vo.DataVO">
+        <result column="id" property="key"/>
+        <result column="firearms_type" property="value"/>
+        <result column="type" property="type"/>
+        <result column="gun" property="tmpGun"/>
+        <result column="bullet" property="tmpBullet"/>
+    </resultMap>
+
+    <select id="selectTotal" resultMap="firearmsDataVO">
+        SELECT
+            tft.id,
+            tft.firearms_type,
+            tft.type,
+            tf.gun,
+            tat.number as bullet
+        FROM
+	      t_firearms_type tft
+        LEFT JOIN ( SELECT firearm_type_id, firearm_type, COUNT(firearm_no) AS gun FROM t_firearms WHERE `status` = 0 GROUP BY firearm_type_id ) tf ON tft.id = tf.firearm_type_id
+        LEFT JOIN t_ammo_firearm taf ON tf.firearm_type_id = taf.firearm_id
+        LEFT JOIN t_ammo_type tat ON taf.ammo_id = tat.id
+    </select>
+</mapper>

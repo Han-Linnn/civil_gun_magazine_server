@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.user.dao.UserMapper">
+
+    <resultMap id="infoVo" type="com.jingde.equipment.app.user.vo.UserInfoVO">
+        <result column="id" property="id"/>
+        <result column="account" property="account"/>
+        <result column="password" property="password"/>
+        <result column="police_code" property="policeCode"/>
+        <result column="police_name" property="policeName"/>
+        <result column="police_id" property="policeId"/>
+        <result column="status" property="status"/>
+        <result column="is_sub_account" property="isSubAccount"/>
+        <result column="is_son" property="isSon"/>
+        <result column="home_page" property="homePage"/>
+        <association property="police" javaType="com.jingde.equipment.model.Police"
+                     columnPrefix="p_">
+            <result column="id" property="id"/>
+            <result column="police_code" property="policeCode"/>
+            <result column="firearm_code" property="firearmCode"/>
+            <result column="sex" property="sex"/>
+            <result column="status" property="status"/>
+            <result column="department_name" property="departmentName"/>
+        </association>
+    </resultMap>
+
+    <select id="findUserById" resultMap="infoVo">
+        select tu.id,
+               tu.account,
+               tu.password,
+               tu.police_code,
+               tu.police_name,
+               tu.police_id,
+               tu.status,
+               tu.is_sub_account,
+               tu.is_son,
+               tp.id as p_id,
+               tp.police_code as p_police_code,
+               tp.firearm_code as p_firearm_code,
+               tp.sex as p_sex,
+               tp.status as p_status,
+               tp.department_name as p_department_name,
+               tu.home_page,
+               tu.is_sub_account,
+               tu.is_son
+        from t_user tu
+                 left join t_police tp on tp.id = tu.police_id
+        where tu.id = #{userId}
+    </select>
+
+    <select id="dutyUserSelect" resultMap="infoVo">
+        select id,account,police_name from t_user where status=#{status}
+    </select>
+
+    <delete id="deleteByPoliceIds">
+        delete from t_user where police_id in  <foreach collection="ids" item="id" separator="," open="(" close=")">#{id} </foreach>
+    </delete>
+
+    <update id="updateByPoliceId">
+        update t_user SET update_time=NOW()
+        <if test="user.policeCode != null and user.policeCode != '' ">,police_code = #{user.policeCode}</if>
+        <if test="user.policeName != null and user.policeName != '' ">, police_name = #{user.policeName}</if>
+        <if test="user.isSon != null ">, is_son = #{user.isSon}</if>
+        <if test="user.homePage != null ">, home_page = #{user.homePage}</if>
+        WHERE police_id = #{user.policeId} and is_son = 0
+    </update>
+
+    <resultMap id="uesrTypeVo" type="com.jingde.equipment.app.system.vo.UserTypeVO">
+        <result column="policeId" property="policeId"/>
+        <result column="userId" property="userId"/>
+        <result column="police_name" property="policeName"/>
+        <result column="police_code" property="policeCode"/>
+        <result column="office_id" property="officeId"/>
+        <result column="leader_level_id" property="levelId"/>
+        <result column="leader_level" property="levelName"/>
+        <result column="level" property="level"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="department" property="departmentName"/>
+    </resultMap>
+
+    <select id="selectUserType" resultMap="uesrTypeVo">
+        SELECT DISTINCT
+        u.id AS userId,
+        u.police_id AS policeId,
+        u.police_code,
+        u.police_name,
+        FROM
+        t_user u
+        LEFT JOIN t_group_user gu on u.id = gu.user_id
+        LEFT JOIN t_group_permission gp on gu.group_id = gp.group_id
+        left join t_permission p on p.id = gp.permission_id
+        where p.permission_url = #{url}
+        <if test="policeName != null and policeName != '' "> and instr(u.police_name,#{policeName}) >0</if>
+        <if test="policeCode != null and policeCode != '' "> and instr(u.police_code,#{policeCode}) >0</if>
+    </select>
+
+    <resultMap id="userSonVo" type="com.jingde.equipment.app.user.vo.UserSonVO">
+        <result column="id" property="id"/>
+         <result column="account" property="account"/>
+         <result column="enable_sub_account" property="enableSubAccount"/>
+         <result column="sub_account_id" property="subAccountId"/>
+    </resultMap>
+    <select id="selectSonAccount" resultMap="userSonVo">
+          select id,account,enable_sub_account,sub_account_id from t_user where police_code = #{policeCode} and is_sub_account = 1
+    </select>
+
+    <update id="updatePasswordById">
+        update t_user set password = #{condition.password} where id = #{condition.id}
+    </update>
+    
+
+    <update id="updateUserById">
+        update t_user SET update_time=NOW()
+        <if test="user.subAccount != null and user.subAccount != '' ">, account = #{user.subAccount}</if>
+        <if test="user.subPassword != null and user.subPassword != '' ">, password = #{user.subPassword}</if>
+        WHERE id = #{user.id}
+    </update>
+
+</mapper>

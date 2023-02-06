@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.system.dao.ComeOutLogMapper">
+
+
+  <resultMap id="pageVotMap" type="com.jingde.equipment.app.system.vo.PolicePageVO">
+    <result column="id" property="id"/>
+    <result column="police_name" property="policeName"/>
+    <result column="sex" property="sex"/>
+    <result column="age" property="age"/>
+    <result column="nation" property="nation"/>
+    <result column="political_status" property="politicalStatus"/>
+    <result column="police_code" property="policeCode"/>
+    <result column="address" property="address"/>
+    <result column="mobile" property="mobile"/>
+    <result column="firearm_code" property="firearmCode"/>
+    <result column="firearm_code_publish" property="firearmCodePublish"/>
+    <result column="annual_verification" property="annualVerification"/>
+    <result column="reason" property="reason"/>
+  </resultMap>
+
+  <resultMap id="ComeOutlogVo" type="com.jingde.equipment.app.duty.vo.ComeOutlogVO">
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="police_name" jdbcType="VARCHAR" property="name" />
+    <result column="job" jdbcType="VARCHAR" property="duties" />
+    <result column="department" jdbcType="VARCHAR" property="unit" />
+    <result column="partner_count" jdbcType="VARCHAR" property="people" />
+    <result column="reason" jdbcType="VARCHAR" property="reason" />
+    <result column="register_date" jdbcType="VARCHAR" property="date" />
+    <result column="come_out_date" jdbcType="VARCHAR" property="entryDate" />
+    <result column="come_out_result" jdbcType="VARCHAR" property="situation" />
+    <result column="note" jdbcType="VARCHAR" property="notes" />
+  </resultMap>
+
+  <select id="findComeOutList" resultMap="ComeOutlogVo">
+    select
+      id,police_name,job,
+      department,partner_count,reason,
+      register_date,come_out_date,come_out_result,
+      note
+    from t_come_out_log order by id desc
+  </select>
+
+</mapper>

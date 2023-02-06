@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jingde.equipment.app.post.dao.PostMapper">
+    <resultMap id="listMap" type="com.jingde.equipment.model.Post">
+        <result column="id" property="id"/>
+        <result column="post_name" property="postName"/>
+        <result column="parent_post_id" property="parentPostId"/>
+        <result column="parent_post_name" property="parentPostName"/>
+        <result column="post_level" property="postLevel"/>
+    </resultMap>
+
+    <select id="selectListByCondition" resultMap="listMap" >
+        SELECT id,post_name,parent_post_id,parent_post_name,post_level,create_time,update_time
+        FROM t_post
+        WHERE 1=1
+         <if test="parentId != null and parentId !='' "> and parent_post_id = #{parentId}</if>
+         <if test="postName != null and postName !='' "> and instr(post_name,#{postName}) >0</if>
+    </select>
+
+    <select id="selectIdByName" resultType="java.lang.String" >
+        SELECT id FROM t_post WHERE post_name= #{postName}
+    </select>
+</mapper>

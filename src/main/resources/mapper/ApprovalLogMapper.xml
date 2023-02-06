@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.record.dao.ApprovalLogMapper">
+
+    <insert id="save">
+        insert into t_approval_log (firearms_used_log_id, approval_person_id, approval_date, login_account_id, login_ip)
+              values (#{form.firearmsUsedLogId},#{form.approvalPersonId},now(),#{form.loginAccountId},#{form.loginIp})
+    </insert>
+</mapper>

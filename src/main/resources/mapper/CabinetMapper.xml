@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.cabinets.dao.CabinetMapper">
+
+    <resultMap id="cabinet" type="com.jingde.equipment.model.Cabinet">
+        <result property="id" column="id"/>
+        <result property="cabinetName" column="cabinet_name"/>
+        <result property="cabinetCode" column="cabinet_code"/>
+        <result property="seqNo" column="seq_no"/>
+        <result property="ip" column="ip"/>
+        <result property="registerDate" column="register_date"/>
+        <result property="registerPerson" column="register_person"/>
+        <result property="note" column="note"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="cabinetLayout" column="cabinet_layout"/>
+        <result property="cabinetHeight" column="cabinet_height"/>
+        <result property="cabinetWidth" column="cabinet_width"/>
+    </resultMap>
+    <!--查询枪柜列表  -->
+    <select id="cabinetList" resultMap="cabinet">
+        select tc.id,
+               tc.cabinet_code,
+               tc.cabinet_no,
+               tc.equipment_category_id,
+               tc.seq_no,
+               tc.ip,
+               tc.register_date,
+               tc.register_person,
+               tc.full_status,
+               tc.note,
+               tc.status
+        from t_cabinet tc
+    </select>
+
+    <!--  详细的枪柜列表（包含枪支信息）  -->
+    <select id="detailCabinetList" resultType="java.util.HashMap">
+        select tc.cabinet_name            as cabinetName,
+               tc.id                      as cabinetId,
+               tc.cabinet_type            as cabinetType,
+               tc.cabinet_entity_id       as cabinetEntityId,
+               tc.note,
+               tc.seq_no                  as seqNo,
+               tcs.firearm_type           as firearmType,
+               tcs.firearm_type_id        as firearmTypeId,
+               count(tcs.firearm_type_id) as count
+        from t_cabinet tc
+                 left join t_cabinet_seat tcs on tcs.cabinet_id = tc.id and firearm_type is not null and tcs.status = 1
+        where tc.status = 1
+          and tc.sync_status = 1
+        group by tc.seq_no, tcs.firearm_type_id
+        order by tc.seq_no
+    </select>
+
+    <!--  详细的枪柜列表（包含弹药信息）  -->
+    <select id="detailWithAmmoCabinetList" resultType="java.util.HashMap">
+        select tc.cabinet_name      as cabinetName,
+               tc.id                as cabinetId,
+               tc.cabinet_type      as cabinetType,
+               tc.cabinet_entity_id as cabinetEntityId,
+               tc.note,
+               tc.seq_no            as seqNo,
+               tcs.ammo_type        as ammoType,
+               tcs.ammo_type_id     as ammoTypeId,
+               sum(tcs.ammo_count)  as count
+        from t_cabinet tc
+                 left join t_cabinet_seat tcs on tcs.cabinet_id = tc.id and ammo_type is not null and tcs.status = 1
+        where tc.status = 1
+          and tc.sync_status = 1
+        group by tc.seq_no, tcs.ammo_type_id
+        order by tc.seq_no
+    </select>
+
+    <!--根据枪柜编号查询枪柜详情  -->
+    <select id="cabinetBycabinetCode" resultMap="cabinet">
+        select *
+        from t_cabinet
+        where cabinet_code = #{condition.cabinetCode}
+    </select>
+
+    <resultMap id="cabinetDetail" type="com.jingde.equipment.model.CabinetDetail">
+        <result property="id" column="id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--根据枪柜编号查询枪座列表  -->
+    <select id="cabinetDetailList" resultMap="cabinetDetail">
+        select *
+        from t_cabinet_detail
+        where cabinet_code = #{condition.cabinetCode}
+    </select>
+
+    <!--新增枪柜  -->
+    <insert id="insertCabinet">
+        INSERT INTO t_cabinet (`cabinet_code`,
+                               `equipment_category_id`,
+                               `equipment_category`,
+                               `ip`,
+                               `register_date`,
+                               `cabinet_no`,
+                               `register_person`,
+                               `cabinet_id`,
+                               `seq_no`,
+                               `cabinet_layout`,
+                               `cabinet_height`,
+                               `cabinet_width`,
+                               `cabinet_name`,
+                               `note`)
+        VALUES (#{condition.cabinetCode},
+                #{condition.equipmentCategoryId},
+                #{condition.equipmentCategory},
+                #{condition.ip},
+                #{condition.registerDate},
+                #{condition.cabinetNo},
+                #{condition.registerPerson},
+                #{condition.cabinetId},
+                #{condition.seqNo},
+                #{condition.cabinetLayout},
+                #{condition.cabinetHeight},
+                #{condition.cabinetWidth},
+                #{condition.cabinetName},
+                #{condition.note})
+    </insert>
+
+    <!--新增枪座  -->
+    <insert id="insertCabinetSeat">
+        INSERT INTO t_cabinet_detail (`cabinet_code`,
+                                      `seat_type`,
+                                      `door_id`,
+                                      `door_index`,
+                                      `door_layout`,
+                                      `door_name`,
+                                      `door_height`,
+                                      `door_width`,
+                                      `area_id`,
+                                      `area_index`,
+                                      `area_layout`,
+                                      `area_name`,
+                                      `area_height`,
+                                      `area_width`,
+                                      `seat_id`,
+                                      `seq`,
+                                      `seat_layout`,
+                                      `seat_name`,
+                                      `seat_height`,
+                                      `seat_width`)
+        VALUES (#{condition.cabinetCode},
+                #{condition.seatType},
+                #{condition.doorId},
+                #{condition.doorIndex},
+                #{condition.doorLayout},
+                #{condition.doorName},
+                #{condition.doorHeight},
+                #{condition.doorWidth},
+                #{condition.areaId},
+                #{condition.areaIndex},
+                #{condition.areaLayout},
+                #{condition.areaName},
+                #{condition.areaHeight},
+                #{condition.areaWidth},
+                #{condition.seatId},
+                #{condition.seq},
+                #{condition.seatLayout},
+                #{condition.seatName},
+                #{condition.seatHeight},
+                #{condition.seatWidth})
+    </insert>
+
+    <!--根据id查询出枪座详情  -->
+    <select id="cabinetDetail" resultMap="cabinetDetail">
+        select *
+        from t_cabinet_detail
+        where id = #{condition.id}
+    </select>
+
+    <!--修改枪座信息  -->
+    <update id="updateCabinetSeat" parameterType="com.jingde.equipment.app.cabinets.dto.CabinetDetailDTO">
+        update t_cabinet_detail
+        <set>
+            <if test="condition.seq != null">
+                `seq` = #{condition.seq},
+            </if>
+
+            <if test="condition.seatCode != null and condition.seatCode != '' ">
+                `seat_code` = #{condition.seatCode},
+            </if>
+
+            <if test="condition.seatCode != null and condition.seatCode != '' ">
+                `seat_code` = #{condition.seatCode},
+            </if>
+
+            <if test="condition.cardCode != null and condition.cardCode != '' ">
+                `card_code` = #{condition.cardCode},
+            </if>
+
+            <if test="condition.inStatus != null and condition.inStatus != '' ">
+                `in_status` = #{condition.inStatus},
+            </if>
+
+            <if test="condition.usedStatus != null and condition.usedStatus != '' ">
+                `used_status` = #{condition.usedStatus},
+            </if>
+
+            <if test="condition.imgUrl != null and condition.imgUrl != '' ">
+                `img_url` = #{condition.imgUrl},
+            </if>
+
+            <if test="condition.status != null and condition.status != '' ">
+                `status` = #{condition.status},
+            </if>
+
+            <if test="condition.firearmsTypeId != null and condition.firearmsTypeId != '' ">
+                `firearms_type_id` = #{condition.firearmsTypeId},
+            </if>
+
+            <if test="condition.firearmsType != null and condition.firearmsType != '' ">
+                `firearms_type` = #{condition.firearmsType},
+            </if>
+
+            <if test="condition.seatType != null and condition.seatType != '' ">
+                `seat_type` = #{condition.seatType},
+            </if>
+            `update_time` = now()
+        </set>
+
+        where id = #{condition.id}
+    </update>
+
+    <!--删除枪柜  -->
+    <delete id="deleteCabinet" parameterType="com.jingde.equipment.app.cabinets.dto.CabinetAddDTO">
+        delete
+        from t_cabinet
+        where id = #{condition.id}
+    </delete>
+
+    <!--删除枪柜对应的枪座  -->
+    <delete id="deleteCabinetSeat" parameterType="com.jingde.equipment.app.cabinets.dto.CabinetAddDTO">
+        delete
+        from t_cabinet_detail
+        where cabinet_code = #{condition.cabinetCode}
+    </delete>
+
+    <!--根据枪柜id查询枪柜详情  -->
+    <select id="cabinetById" resultMap="cabinet">
+        select *
+        from t_cabinet
+        where id = #{condition.id}
+    </select>
+
+    <!--查询枪柜/弹柜下拉列表  -->
+    <select id="cabinetSelect" resultMap="cabinet">
+        select tc.id, tc.cabinet_code, tc.cabinet_no, ifnull(tc.cabinet_name, "") as cabinet_name, tc.ip
+        from t_cabinet tc
+                 INNER JOIN t_equipment_category tec ON tc.equipment_category_id = tec.id
+        where tec.type = #{type}
+    </select>
+
+</mapper>

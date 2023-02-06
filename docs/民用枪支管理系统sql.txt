@@ -1,0 +1,564 @@
+
+-- 1.枪炮保养相关表
+DROP TABLE IF EXISTS `t_clean_log`;
+CREATE TABLE `t_clean_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `resaon` varchar(200) DEFAULT NULL COMMENT '保养原因',
+  `clean_date` varchar(20) NOT NULL COMMENT '擦拭(保养)时间',
+  `apply_person_id` varchar(11) DEFAULT NULL COMMENT '申请人id',
+  `apply_person` varchar(10) DEFAULT NULL COMMENT '申请人',
+  `auditing_person` varchar(20) DEFAULT NULL COMMENT '审批人',
+  `auditing_person_id` int(11) DEFAULT NULL COMMENT '审批人id',
+  `firearm_count` int(3) DEFAULT NULL COMMENT '枪支数量',
+  `auditing_reason` varchar(200) DEFAULT NULL COMMENT '保养不通过原因',
+  `clean_person1_id` varchar(11) DEFAULT NULL COMMENT '擦拭包养人id',
+  `clean_person1` varchar(20) DEFAULT NULL COMMENT '擦拭保养人',
+  `clean_person2_id` varchar(11) DEFAULT NULL COMMENT '擦拭包养人id',
+  `clean_person2` varchar(20) DEFAULT NULL COMMENT '擦拭保养人',
+  `clean_complete_person1` varchar(20) DEFAULT NULL COMMENT '擦拭完成人',
+  `clean_complete_person1_id` int(11) DEFAULT NULL COMMENT '擦拭完成人id',
+  `clean_complete_person2` varchar(20) DEFAULT NULL COMMENT '擦拭完成人2',
+  `clean_complete_person2_id` int(11) DEFAULT NULL COMMENT '擦拭完成人2id',
+  `status` varchar(3) DEFAULT '1' COMMENT '保养状态(01:待审批05:待保养10:审批不通过15:保养中20:待入柜25:保养完成30:保养取消)',
+  `note` varchar(200) DEFAULT '1' COMMENT '备注',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='擦拭保养记录';
+
+DROP TABLE IF EXISTS `t_clean_log_info`;
+CREATE TABLE `t_clean_log_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `clean_log_id` int(11) DEFAULT NULL COMMENT '保养记录id',
+  `firearm_type_id` int(11) DEFAULT NULL COMMENT '枪炮类型id',
+  `firearm_type` varchar(64) DEFAULT NULL COMMENT '枪支类型',
+  `firearm_no` text DEFAULT NULL COMMENT '枪支编号(XX,XX,XX)',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='擦拭保养记录详情';
+
+-- 2.枪炮与弹药类型表
+DROP TABLE IF EXISTS `t_firearms_type`;
+CREATE TABLE `t_firearms_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `firearms_type` varchar(20) NOT NULL COMMENT '枪炮名称',
+  `type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '类型(0:枪支,1:炮)',
+  `register_date` varchar(20) NOT NULL COMMENT '登记日期',
+  `register_person` varchar(20) NOT NULL COMMENT '登记人',
+  `level_type` tinyint(1) DEFAULT '0' COMMENT '枪支等级(:0:普通,1:特殊)==>保留字段',
+  `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+  `note` varchar(200) DEFAULT NULL COMMENT '备注',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='枪炮类型表';
+
+DROP TABLE IF EXISTS `t_firearms`;
+CREATE TABLE `t_firearms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `firearm_type_id` int(11) DEFAULT NULL COMMENT '枪炮类型id',
+  `firearm_type` varchar(64) DEFAULT NULL COMMENT '枪支类型',
+  `firearm_no` varchar(64) DEFAULT NULL COMMENT '枪炮编号(枪炮,枪炮唯一码,枪炮二维码)',
+  `status` tinyint(1) DEFAULT '0' COMMENT '状态:(0-在库,1-不在库,2-待保养,3-保养中,4-故障,...)',
+  `expected_return_time` varchar(20) DEFAULT NULL COMMENT '预计归还时间(status =1)',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `firearmNo` (`firearm_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='枪支表';
+
+DROP TABLE IF EXISTS `t_ammo_type`;
+CREATE TABLE `t_ammo_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ammo_type` varchar(20) NOT NULL COMMENT '弹药名称',
+  `type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '类型(0:子弹,1:炮弹)',
+  `number` int(11) NOT NULL DEFAULT '0' COMMENT '数量',
+  `register_date` varchar(20) NOT NULL COMMENT '登记日期',
+  `register_person` varchar(20) NOT NULL COMMENT '登记人',
+  `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+  `note` varchar(200) DEFAULT NULL COMMENT '备注',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='弹药类型表';
+
+DROP TABLE IF EXISTS `t_ammo_firearm`;
+CREATE TABLE `t_ammo_firearm` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ammo_id` int(11) NOT NULL COMMENT '弹药id',
+  `firearm_id` int(11) NOT NULL COMMENT '枪炮类型id',
+  `ammo_type` varchar(20) NOT NULL COMMENT '弹药类型',
+  `firearm_type` varchar(20) NOT NULL COMMENT '枪支类型',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='弹药适用的枪支/炮类型';
+
+-- 3.申请枪炮相关表
+
+DROP TABLE IF EXISTS `t_firearms_apply_log`;
+CREATE TABLE `t_firearms_apply_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `apply_date` varchar(20) DEFAULT NULL COMMENT '预计领用时间',
+  `apply_reason` varchar(40) DEFAULT NULL COMMENT '领用理由',
+  `apply_person_id` int(11) DEFAULT NULL COMMENT '领枪人id',
+  `apply_person` varchar(20) DEFAULT NULL COMMENT '领枪人',
+  `auditing_person_id` int(11) DEFAULT NULL COMMENT '审批人 id',
+  `auditing_person` varchar(20) DEFAULT NULL COMMENT '审批人',
+  `auditing_date` varchar(20) DEFAULT NULL COMMENT '审批时间',
+  `return_date` varchar(20) DEFAULT NULL COMMENT '预计归还日期(延迟还枪会被更新)',
+  `first_return_date` varchar(20) DEFAULT NULL COMMENT '初次预计交还时间',
+  `delay_approver_id` int(11) DEFAULT NULL COMMENT '延时审批人id',
+  `delay_approver` varchar(20) DEFAULT NULL COMMENT '延时审批人',
+  `status` varchar(2) DEFAULT '01' COMMENT '状态(具体查看api文档)',
+  `note` varchar(200) DEFAULT NULL COMMENT '备注(审核不过原因)',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='领用审批登记表';
+
+DROP TABLE IF EXISTS `t_firearms_apply_type_log`;
+CREATE TABLE `t_firearms_apply_type_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `apply_id` int(11) DEFAULT NULL COMMENT '申请记录id',
+  `firearm_type_id` int(11) DEFAULT NULL COMMENT '枪炮类型id',
+  `firearm_type` varchar(20) DEFAULT NULL COMMENT '枪炮类型(名称)',
+  `ammo_type_id` int(11) DEFAULT NULL COMMENT '弹药类型id',
+  `ammo_type` varchar(20) DEFAULT NULL COMMENT '弹药名称',
+  `apply_firearm_count` int(3) DEFAULT '0' COMMENT '申请枪支数量',
+  `received_firearm_count` int(3) DEFAULT '0' COMMENT '已领取枪炮数量',
+  `returned_firearm_count` int(3) DEFAULT '0' COMMENT '已归还枪炮数量',
+  `apply_ammo_count` int(3) DEFAULT '0' COMMENT '申请弹药数量',
+  `received_ammo_count` int(3) DEFAULT '0' COMMENT '已领取弹药数量',
+  `returned_ammo_count` int(3) DEFAULT '0' COMMENT '已归还弹药数量',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='申请类型记录表';
+
+DROP TABLE IF EXISTS `t_firearms_apply_type_info`;
+CREATE TABLE `t_firearms_apply_type_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `apply_id` int(11) DEFAULT NULL COMMENT '申请记录id', 
+  `apply_type_id` int(11) DEFAULT NULL COMMENT '申请类型记录id', 
+  `firearm_type_id` int(11) DEFAULT NULL COMMENT '枪炮类型id', 
+  `firearm_type` varchar(20) DEFAULT NULL COMMENT '枪炮类型(名称)',
+  `firearm_no` varchar(64) DEFAULT NULL COMMENT '枪炮编号(枪炮,枪炮唯一码,枪炮二维码)',
+  `receive_batch_id` int(11) DEFAULT NULL COMMENT '领取批次id', 
+  `return_batch_id` int(11) DEFAULT NULL COMMENT '归还批次id',
+  `status` varchar(2) DEFAULT '0' COMMENT '状态(0:未归还,1:已归还)',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='申请类型记录表';
+
+DROP TABLE IF EXISTS `t_firearms_receive_batch`;
+CREATE TABLE `t_firearms_receive_batch` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `apply_id` int(11) DEFAULT NULL COMMENT '申请记录id', 
+  `keeping_person_id` int(11) DEFAULT NULL COMMENT '保管人 id',
+  `keeping_person` varchar(20) DEFAULT NULL COMMENT '保管人',
+  `keeping_person2_id` int(11) DEFAULT NULL COMMENT '保管人2 id',
+  `keeping_person2` varchar(20) DEFAULT NULL COMMENT '保管人',
+  `confirm_person_id` int(11) DEFAULT NULL COMMENT '(领枪)确认人id',
+  `confirm_person` varchar(20) DEFAULT NULL COMMENT '(领枪)确认人',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='申请类型记录表';
+
+DROP TABLE IF EXISTS `t_firearms_return_batch`;
+CREATE TABLE `t_firearms_return_batch` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `apply_id` int(11) DEFAULT NULL COMMENT '申请记录id', 
+  `keeping_person_id` int(11) DEFAULT NULL COMMENT '保管人 id',
+  `keeping_person` varchar(20) DEFAULT NULL COMMENT '保管人',
+  `keeping_person2_id` int(11) DEFAULT NULL COMMENT '保管人2 id',
+  `keeping_person2` varchar(20) DEFAULT NULL COMMENT '保管人',
+  `confirm_person_id` int(11) DEFAULT NULL COMMENT '(还枪)确认人id',
+  `confirm_person` varchar(20) DEFAULT NULL COMMENT '(还枪)确认人',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='申请类型记录表';
+
+
+DROP TABLE IF EXISTS `t_ammo_receive_batch_info`;
+CREATE TABLE `t_ammo_receive_batch_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `apply_id` int(11) DEFAULT NULL COMMENT '申请记录id',
+  `apply_type_id` int(11) DEFAULT NULL COMMENT '申请类型记录id',
+  `firearm_type_id` int(11) DEFAULT NULL COMMENT '枪炮类型id',
+  `firearm_type` varchar(20) DEFAULT NULL COMMENT '枪炮类型(名称)',
+	`ammo_type_id` int(11) DEFAULT NULL COMMENT '弹药类型id',
+  `ammo_type` varchar(20) DEFAULT NULL COMMENT '弹药名称',
+	`received_ammo_count` int(3) DEFAULT '0' COMMENT '领取弹药数量',
+  `receive_batch_id` int(11) DEFAULT NULL COMMENT '领取批次id',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='弹药类型领取记录详情表';
+
+DROP TABLE IF EXISTS `t_ammo_return_batch_info`;
+CREATE TABLE `t_ammo_return_batch_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `apply_id` int(11) DEFAULT NULL COMMENT '申请记录id',
+  `apply_type_id` int(11) DEFAULT NULL COMMENT '申请类型记录id',
+  `firearm_type_id` int(11) DEFAULT NULL COMMENT '枪炮类型id',
+  `firearm_type` varchar(20) DEFAULT NULL COMMENT '枪炮类型(名称)',
+	`ammo_type_id` int(11) DEFAULT NULL COMMENT '弹药类型id',
+  `ammo_type` varchar(20) DEFAULT NULL COMMENT '弹药名称',
+  `returned_ammo_count` int(3) DEFAULT '0' COMMENT '归还弹药数量',
+  `return_batch_id` int(11) DEFAULT NULL COMMENT '归还批次id',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='弹药类型归还记录详情表';
+
+-- 4.人员相关表
+DROP TABLE IF EXISTS `t_department`;
+CREATE TABLE `t_department` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(20) NOT NULL COMMENT '部门名称',
+  `note` varchar(400) DEFAULT NULL COMMENT '备注',
+  `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='部门表';
+
+DROP TABLE IF EXISTS `t_post`;
+CREATE TABLE `t_post` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_name` varchar(20) NOT NULL COMMENT '职务名称',
+  `parent_post_id` int(11) DEFAULT '0' COMMENT '直接上级职务id',
+  `parent_post_name` varchar(20) DEFAULT NULL COMMENT '直接上级职务名称',
+  `post_level` int(2) DEFAULT NULL COMMENT '职务级别(保留字段)',
+  `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='职务表';
+
+DROP TABLE IF EXISTS `t_police`;
+CREATE TABLE `t_police` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `depart_id` int(11) DEFAULT NULL COMMENT '部门id',
+  `department_name` varchar(20) DEFAULT NULL COMMENT '部门名称',
+  `post_id` int(11) DEFAULT NULL COMMENT '职务id',
+  `post_name` varchar(20) DEFAULT NULL COMMENT '职务名称',
+  `police_name` varchar(20) NOT NULL COMMENT '姓名',
+  `police_code` varchar(40) NOT NULL COMMENT '(警员/工作)编号',
+  `political_status` varchar(100) DEFAULT NULL COMMENT '政治面貌',
+  `mobile` varchar(11) DEFAULT NULL COMMENT '号码',
+  `mobile_bak` varchar(11) DEFAULT NULL COMMENT '备用号码',
+  `sex` tinyint(1) DEFAULT NULL COMMENT '性别：0-女，1-男',
+  `age` int(11) DEFAULT NULL COMMENT '年龄',
+  `id_card` varchar(20) DEFAULT NULL COMMENT '身份证',
+  `nation` varchar(200) DEFAULT NULL COMMENT '民族',
+  `photo` varchar(200) DEFAULT NULL COMMENT '照片',
+  `address` varchar(100) DEFAULT NULL COMMENT '住址',
+  `firearm_code` varchar(40) DEFAULT NULL COMMENT '枪证(保留字段)',
+  `firearm_code_publish` varchar(20) DEFAULT NULL COMMENT '发证日期(保留字段)',
+  `annual_verification` text COMMENT '年审情况(0:通过,1:不通过)保留字段)',
+  `gun_code` varchar(100) DEFAULT NULL COMMENT '枪号(人员指定用枪)保留字段)',
+  `use_gun_status` tinyint(1) DEFAULT '0' COMMENT '用枪状态(0=允许用枪,1=禁止用枪)保留字段)',
+  `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='警员表:用来存放警员信息';
+
+DROP TABLE IF EXISTS `t_user`;
+CREATE TABLE `t_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account` varchar(40) NOT NULL COMMENT '账号(工作编号)',
+  `password` varchar(80) DEFAULT NULL COMMENT '密码',
+  `police_id` int(11) NOT NULL COMMENT '人员id',
+  `police_code` varchar(40) DEFAULT NULL COMMENT '(警员/工作)编号',
+  `police_name` varchar(20) DEFAULT NULL COMMENT '姓名',
+  `last_login_time` varchar(20) DEFAULT NULL COMMENT '最后登陆时间',
+  `login_count` int(11) DEFAULT '0' COMMENT '登陆次数',
+  `is_sub_account` tinyint(1) DEFAULT '0' COMMENT '(0:主账号(默认),1:是子账号)',
+  `is_son` tinyint(1) DEFAULT '1' COMMENT '是否有子账号(0:有子账号,1:没有子账号(默认))==>该账号如果是主账号',
+  `enable_sub_account` tinyint(1) DEFAULT '0' COMMENT '是否启用(0:启用,1:不启用)==>该账号如果是子账号',
+  `sub_account_id` varchar(20) DEFAULT NULL COMMENT '授权的子账号用户id(user.id)==>子账号id',
+  `home_page` varchar(2) DEFAULT '0' COMMENT '首页(0:警员首页,1:枪管员首页,2:领导首页)',
+  `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户表:用来存放登陆信息(建议拿警员编号作为登陆账号)';
+  
+ 
+-- 5.资源与组关系表
+DROP TABLE IF EXISTS `t_group`;
+CREATE TABLE `t_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(40) NOT NULL COMMENT '组名称',
+  `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+  `note` varchar(400) DEFAULT NULL COMMENT '备注',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='归属表:用来存放组信息';
+
+DROP TABLE IF EXISTS `t_group_user`;
+CREATE TABLE `t_group_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL COMMENT '(角色/组)id',
+  `user_id` int(11) NOT NULL COMMENT '用户(账号)id',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色用户中间表';
+
+DROP TABLE IF EXISTS `t_resources`;
+CREATE TABLE `t_resources` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `resources_name` varchar(64) NOT NULL COMMENT '资源名称',
+  `resources_url` varchar(128) NOT NULL COMMENT '资源url路径',
+  `resources_note` varchar(255) DEFAULT NULL COMMENT '资源描述',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='前端资源表(预留)';
+
+DROP TABLE IF EXISTS `t_group_menu`;
+CREATE TABLE `t_group_menu` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL COMMENT '(角色/组)id',
+  `permission_url` varchar(200) NOT NULL COMMENT '权限url',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色菜单中间表';
+
+DROP TABLE IF EXISTS `t_permission`;
+CREATE TABLE `t_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(64) NOT NULL COMMENT '权限名称',
+  `permission_url` varchar(128) NOT NULL COMMENT '权限url路径',
+  `permission_note` varchar(255) DEFAULT NULL COMMENT '权限描述',
+  `sort` int(3) DEFAULT NULL COMMENT '权限排序',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限表';
+
+DROP TABLE IF EXISTS `t_group_permission`;
+CREATE TABLE `t_group_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL COMMENT '角色(组)id',
+  `permission_id` int(11) NOT NULL COMMENT '权限id',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色可操作的资源权限表';
+
+ -- 其他表
+ DROP TABLE IF EXISTS `t_ammo_change_log`;
+ CREATE TABLE `t_ammo_change_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `cause` varchar(20) DEFAULT NULL COMMENT '变更原因',
+   `total` int(11) DEFAULT '0' COMMENT '合计',
+   `content` text COMMENT '明细',
+   `register_date` varchar(20) NOT NULL COMMENT '登记日期',
+   `register_name` varchar(20) NOT NULL COMMENT '登记人',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='弹药变更情况';
+
+ DROP TABLE IF EXISTS `t_approval_log`;
+ CREATE TABLE `t_approval_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `firearms_used_log_id` varchar(20) DEFAULT NULL COMMENT '申请记录id',
+   `approval_person_id` varchar(20) DEFAULT NULL COMMENT '审批人id',
+   `approval_date` varchar(20) DEFAULT NULL COMMENT '审批时间',
+   `login_account_id` varchar(20) DEFAULT NULL COMMENT '登录账号id',
+   `login_ip` varchar(20) DEFAULT NULL COMMENT '登录账号所用ip',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='审批日志表';
+
+ DROP TABLE IF EXISTS `t_authorize_log`;
+ CREATE TABLE `t_authorize_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `authorize_police_code` varchar(20) DEFAULT NULL COMMENT '授权警员编号',
+   `authorize_id` int(11) DEFAULT NULL COMMENT '授权用户id',
+   `sub_id` int(11) DEFAULT NULL COMMENT '授权用户的子账号id',
+   `user_police_code` varchar(20) DEFAULT NULL COMMENT '被授权人的警员编号',
+   `user_id` int(11) DEFAULT NULL COMMENT '用户id(被授权人id)',
+   `start_using` tinyint(1) DEFAULT '0' COMMENT '启用(0:启用,1:关闭启用)',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='授权子账号日志表';
+
+ DROP TABLE IF EXISTS `t_come_out_log`;
+ CREATE TABLE `t_come_out_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `police_name` varchar(20) NOT NULL COMMENT '警员名称',
+   `job` varchar(20) DEFAULT NULL COMMENT '职务',
+   `department` varchar(20) DEFAULT NULL COMMENT '单位',
+   `partner_count` int(5) DEFAULT '0' COMMENT '同行人数',
+   `reason` varchar(200) DEFAULT NULL COMMENT '事由',
+   `come_out_date` varchar(20) DEFAULT NULL COMMENT '进库时间',
+   `come_out_result` varchar(40) DEFAULT NULL COMMENT '检查情况',
+   `note` varchar(200) DEFAULT NULL COMMENT '备注',
+   `register_date` varchar(20) NOT NULL COMMENT '登记日期',
+   `register_name` varchar(20) NOT NULL COMMENT '登记人',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='人员进出记录';
+
+ DROP TABLE IF EXISTS `t_duty_log`;
+ CREATE TABLE `t_duty_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `duty_date` varchar(20) NOT NULL COMMENT '日期',
+   `duty_content` text COMMENT '统计情况',
+   `off_duty_person_id` int(11) DEFAULT NULL COMMENT '交班人1id',
+   `off_duty_person` varchar(20) DEFAULT NULL COMMENT '交班人1',
+   `off_duty_person2_id` int(11) DEFAULT NULL COMMENT '交班人2id',
+   `off_duty_person2` varchar(20) DEFAULT NULL COMMENT '交班人2',
+   `on_duty_person_id` int(11) DEFAULT NULL COMMENT '接班人1id',
+   `on_duty_person` varchar(20) DEFAULT NULL COMMENT '接班人1',
+   `on_duty_person2_id` int(11) DEFAULT NULL COMMENT '接班人2id',
+   `on_duty_person2` varchar(20) DEFAULT NULL COMMENT '接班人2',
+   `note` varchar(200) DEFAULT NULL COMMENT '备注',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='值班交接日志';
+
+ DROP TABLE IF EXISTS `t_equipment_category`;
+ CREATE TABLE `t_equipment_category` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `equipment_category` varchar(20) NOT NULL COMMENT '子类型',
+   `type` tinyint(1) DEFAULT '0' COMMENT '所属: 0-枪，1-弹',
+   `note` varchar(200) DEFAULT NULL COMMENT '备注',
+   `register_date` varchar(20) NOT NULL COMMENT '登记日期',
+   `register_person` varchar(20) NOT NULL COMMENT '登记人',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='枪&弹类别';
+
+ DROP TABLE IF EXISTS `t_firearms_change_log`;
+ CREATE TABLE `t_firearms_change_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `cause` varchar(20) DEFAULT NULL COMMENT '变更原因',
+   `total` int(11) DEFAULT '0' COMMENT '合计',
+   `content` text COMMENT '明细',
+   `register_date` varchar(20) NOT NULL COMMENT '登记日期',
+   `register_name` varchar(20) NOT NULL COMMENT '登记人',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='枪支变更情况';
+
+ DROP TABLE IF EXISTS `t_police_annual_inspection`;
+ CREATE TABLE `t_police_annual_inspection` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `date` varchar(20) DEFAULT NULL COMMENT '年检时间',
+   `status` tinyint(1) DEFAULT '0' COMMENT '是否通过(0通过,1未通过)',
+   `police_id` int(11) DEFAULT NULL COMMENT '警员id',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='警员年检信息记录表';
+
+ DROP TABLE IF EXISTS `t_police_equipment_log`;
+ CREATE TABLE `t_police_equipment_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `issue_date` varchar(20) NOT NULL COMMENT '配发时间',
+   `firearms_type` varchar(20) DEFAULT NULL COMMENT '枪支类型',
+   `firearms_no` varchar(40) DEFAULT NULL COMMENT '枪号',
+   `firearms_code` varchar(40) DEFAULT NULL COMMENT '枪证号码',
+   `manager_status` varchar(20) DEFAULT '0' COMMENT '管理状态',
+   `used_log` varchar(20) DEFAULT NULL COMMENT '痕迹建档',
+   `change_result` varchar(40) DEFAULT NULL COMMENT '变动情况',
+   `note` varchar(200) DEFAULT NULL COMMENT '备注',
+   `manager_person` varchar(20) DEFAULT NULL COMMENT '枪管员',
+   `auditing_person` varchar(20) DEFAULT NULL COMMENT '审核人',
+   `auditing_date` varchar(20) DEFAULT NULL COMMENT '审批时间',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   `firearms_type_id` int(11) DEFAULT NULL COMMENT '枪支类型id',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='配备明细';
+
+ DROP TABLE IF EXISTS `t_police_equipment_used`;
+ CREATE TABLE `t_police_equipment_used` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `police_code` varchar(20) NOT NULL COMMENT '警员编号',
+   `reason` varchar(40) DEFAULT NULL COMMENT '不良记录',
+   `note` varchar(200) DEFAULT NULL COMMENT '备注',
+   `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-允许，0-禁止',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE,
+   UNIQUE KEY `police_code` (`police_code`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='配枪人员表';
+
+ DROP TABLE IF EXISTS `t_police_unhealthy_record`;
+ CREATE TABLE `t_police_unhealthy_record` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `date` varchar(20) DEFAULT NULL COMMENT '不良记录时间',
+   `status` tinyint(1) DEFAULT '0' COMMENT '是否有效(0有效,1无效)',
+   `reason` varchar(255) DEFAULT NULL COMMENT '不良记录原因',
+   `police_id` int(11) DEFAULT NULL COMMENT '警员id',
+   `use_gun_status` tinyint(1) DEFAULT '1' COMMENT '是否被禁枪(0=不被禁枪,1=被禁枪)',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='警员不良信息记录表';
+
+ DROP TABLE IF EXISTS `t_sign_item`;
+ CREATE TABLE `t_sign_item` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `item_level` tinyint(1) DEFAULT NULL COMMENT '层次：1-一级项目，2-二级项目，依次类推',
+   `parent_id` int(11) DEFAULT '0' COMMENT '所属id',
+   `item_seq` int(8) DEFAULT NULL COMMENT '序号',
+   `item_name` varchar(80) DEFAULT NULL COMMENT '项目名称',
+   `item_content` varchar(800) DEFAULT NULL COMMENT '内容',
+   `follow_range` varchar(20) DEFAULT NULL COMMENT '适用对象',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='登记项目表';
+
+ DROP TABLE IF EXISTS `t_sign_log`;
+ CREATE TABLE `t_sign_log` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `product_department` varchar(20) DEFAULT NULL COMMENT '制表单位',
+   `check_department` varchar(20) DEFAULT NULL COMMENT '检查单位',
+   `check_name` varchar(20) DEFAULT NULL COMMENT '检查人员',
+   `check_date` varchar(20) DEFAULT NULL COMMENT '检查日期',
+   `department` varchar(20) DEFAULT NULL COMMENT '被检单位',
+   `sign_name` varchar(20) DEFAULT NULL COMMENT '签名',
+   `content` text COMMENT 'html内容',
+   `status` tinyint(1) DEFAULT '1' COMMENT '状态：1-有效，0-无效',
+   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   `principal` varchar(20) DEFAULT NULL COMMENT '负责人 ',
+   `problem` varchar(1000) DEFAULT NULL COMMENT '存在问题 ',
+   `submit_date` varchar(20) DEFAULT NULL COMMENT '提交时间 ',
+   `to_department` varchar(20) DEFAULT NULL COMMENT '上报单位 ',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='登记页';
+
+ DROP TABLE IF EXISTS `t_sys_config`;
+ CREATE TABLE `t_sys_config` (
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `name` varchar(20) DEFAULT NULL COMMENT '系统名称',
+   `logo` varchar(200) DEFAULT NULL COMMENT 'Logo',
+   `copyright` varchar(80) DEFAULT NULL COMMENT '版权信息',
+   `technology` varchar(80) DEFAULT NULL COMMENT '技术支持',
+   `mobile` varchar(11) DEFAULT NULL COMMENT '服务电话',
+   PRIMARY KEY (`id`) USING BTREE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统信息';

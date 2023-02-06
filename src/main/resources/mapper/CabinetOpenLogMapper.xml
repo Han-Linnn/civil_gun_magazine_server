@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingde.equipment.app.cabinets.dao.CabinetOpenLogMapper">
+
+    <!--  枪支领用记录  -->
+    <resultMap id="seatLogListMap" type="com.jingde.equipment.app.cabinets.vo.CabinetSeatLogVO">
+        <result column="seat_type" property="seatType"/>
+        <result column="seat_name" property="seatName"/>
+        <result column="seat_entity_id" property="seatEntityId"/>
+        <result column="firearm_type" property="firearmType"/>
+        <result column="firearm_no" property="firearmNo"/>
+        <result column="ammo_type" property="ammoType"/>
+        <result column="ammo_count" property="ammoCount"/>
+        <result column="back_status" property="backStatus"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    <resultMap id="logListMap" type="com.jingde.equipment.app.cabinets.vo.CabinetOpenLogVO">
+        <result column="id" property="id"/>
+        <result column="apply_date" property="applyDate"/>
+        <result column="apply_reason" property="applyReason"/>
+        <result column="deliveryTime" property="deliveryTime"/>
+        <result column="storageTime" property="storageTime"/>
+        <result column="firearm_no" property="firearmNo"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <select id="cabinetOpenLogList" resultMap="logListMap">
+        SELECT
+          fal.id,fal.apply_date,fal.apply_reason,frb.create_time as deliveryTime,frbn.create_time as storageTime,
+          fati.firearm_no,fati.`status`
+        FROM t_firearms_apply_type_info fati
+	    LEFT JOIN  t_firearms_apply_log fal on fati.apply_id = fal.id
+        LEFT JOIN  t_firearms_receive_batch frb ON fal.id = frb.apply_id
+        LEFT JOIN  t_firearms_return_batch frbn ON fal.id = frbn.apply_id
+        ORDER BY fal.create_time DESC
+    </select>
+
+
+
+</mapper>
