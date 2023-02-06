@@ -2,7 +2,7 @@
 
 民用枪支管理系统服务端
 ###
-###Launch project:
+### Launch project:
 First run: 
 ```bash
 com.company.project.Application.java
@@ -19,7 +19,7 @@ Upload deployment:
 ```
 
 ###
-###Compile and deploy to server:
+### Compile and deploy to server:
 ```bash
 cd ~/project/equipment
 git pull origin dev
